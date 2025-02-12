@@ -1,6 +1,6 @@
 use candid::{CandidType, Principal};
 
-const LLM_CANISTER: &str = "bnz7o-iuaaa-aaaaa-qaaaa-cai";
+const LLM_CANISTER: &str = "w36hm-eqaaa-aaaal-qr76a-cai";
 
 #[derive(CandidType, Clone)]
 struct Request {
