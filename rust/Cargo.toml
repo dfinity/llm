@@ -1,0 +1,8 @@
+[package]
+name = "ic-llm"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+candid = "0.10.13"
+ic-cdk = "0.17.1"
