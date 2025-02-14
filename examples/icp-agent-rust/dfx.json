@@ -1,0 +1,26 @@
+{
+  "canisters": {
+    "llm": {
+      "type": "custom",
+      "wasm": "./llm-canister.wasm",
+      "candid": "./src/backend/backend.did",
+      "specified_id": "w36hm-eqaaa-aaaal-qr76a-cai"
+    },
+    "agent": {
+      "candid": "src/backend/backend.did",
+      "package": "local_backend",
+      "type": "rust"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    },
+    "replica": {
+      "subnet_type": "system"
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
