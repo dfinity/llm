@@ -12,6 +12,12 @@
       "type": "rust"
     }
   },
+  "networks": {
+    "local": {
+      "bind": "0.0.0.0:8080",
+      "type": "ephemeral"
+    }
+  },
   "defaults": {
     "build": {
       "args": "",
