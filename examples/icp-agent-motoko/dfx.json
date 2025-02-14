@@ -1,0 +1,31 @@
+{
+  "canisters": {
+    "llm": {
+      "type": "custom",
+      "wasm": "./llm-canister.wasm",
+      "candid": "./.dfx/local/canisters/agent/service.did",
+      "specified_id": "w36hm-eqaaa-aaaal-qr76a-cai"
+    },
+    "agent": {
+      "main": "src/icp-agent-motoko-backend/main.mo",
+      "type": "motoko"
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "0.0.0.0:8080",
+      "type": "ephemeral"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    },
+    "replica": {
+      "subnet_type": "system"
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
