@@ -20,7 +20,7 @@
   "defaults": {
     "build": {
       "args": "",
-      "packtool": ""
+      "packtool": "mops sources"
     },
     "replica": {
       "subnet_type": "system"

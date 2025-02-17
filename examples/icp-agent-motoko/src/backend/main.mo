@@ -1,4 +1,4 @@
-import LLM "llm";
+import LLM "mo:llm";
 
 actor {
   let system_prompt: Text = "You are an assistant who is able to lookup the balances of ICP tokens.
