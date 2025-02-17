@@ -2,6 +2,6 @@
 name = "llm"
 version = "1.0.0"
 description = "Library for the LLM canister"
-repository = ""
+repository = "https://github.com/dfinity/llm"
 keywords = [ "llm", "ai", "agent" ]
 license = "MIT"
