@@ -22,9 +22,15 @@ module {
     v0_chat: (Request) -> async Text
   };
 
+  func modelString(model: Model) : Text {
+    switch(model) {
+      case (#Llama3_1_8B) { "llama3.1:8b" };
+    }
+  };
+
   public func prompt(model: Model, promptStr: Text) : async Text {
     let request : Request = {
-      model = "llama3.1:8b";
+      model = modelString(model);
       messages = [
         {
           role = #user;
@@ -34,5 +40,14 @@ module {
     };
 
     await llmCanister.v0_chat(request)
-  }
+  };
+
+  public func chat(model: Model, messages: [ChatMessage]) : async Text {
+    let request : Request = {
+      model = modelString(model);
+      messages = messages;
+    };
+
+    await llmCanister.v0_chat(request)
+  };
 }
