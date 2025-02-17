@@ -7,7 +7,7 @@
       "specified_id": "w36hm-eqaaa-aaaal-qr76a-cai"
     },
     "agent": {
-      "main": "src/icp-agent-motoko-backend/main.mo",
+      "main": "src/backend/main.mo",
       "type": "motoko"
     }
   },
