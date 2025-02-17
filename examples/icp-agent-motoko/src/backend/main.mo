@@ -39,7 +39,7 @@ For any other request, say that 'I'm an agent that can only be used for looking 
   public func chat(prompt: Text) : async Text {
     await LLM.chat(#Llama3_1_8B, [
       {
-        role = #system2;
+        role = #system_;
         content = system_prompt;
       },
       {

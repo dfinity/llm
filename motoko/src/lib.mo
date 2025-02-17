@@ -5,7 +5,7 @@ module {
 
   type Role = {
     #user;
-    #system2;
+    #system_;
   };
 
   type ChatMessage = {
