@@ -1,8 +1,9 @@
+//! A library for making requests to the LLM canister on the Internet Computer.
 use candid::{CandidType, Principal};
 use serde::Serialize;
 use std::fmt;
-use ic_cdk::api::{call::call, caller};
 
+// The principal of the LLM canister.
 const LLM_CANISTER: &str = "w36hm-eqaaa-aaaal-qr76a-cai";
 
 #[derive(CandidType, Serialize)]
@@ -11,6 +12,7 @@ struct Request {
     messages: Vec<ChatMessage>,
 }
 
+/// The role of a `ChatMessage`.
 #[derive(CandidType, Serialize)]
 pub enum Role {
     #[serde(rename = "system")]
@@ -19,13 +21,14 @@ pub enum Role {
     User,
 }
 
+/// A message in a chat.
 #[derive(CandidType, Serialize)]
 pub struct ChatMessage {
     pub role: Role,
     pub content: String,
 }
 
-// TODO: use this
+/// Supported LLM models.
 pub enum Model {
     Llama3_1_8B,
 }
@@ -39,7 +42,17 @@ impl fmt::Display for Model {
     }
 }
 
-/// Send a single prompt to a model.
+/// Sends a single message to a model.
+///
+/// # Example
+///
+/// ```
+/// use ic_llm::Model;
+///
+/// # async fn prompt_example() -> String {
+/// ic_llm::prompt(Model::Llama3_1_8B, "What's the speed of light?").await
+/// # }
+/// ```
 pub async fn prompt<P: ToString>(model: Model, prompt_str: P) -> String {
     let llm_canister = Principal::from_text(LLM_CANISTER).expect("invalid canister id");
 
@@ -59,7 +72,30 @@ pub async fn prompt<P: ToString>(model: Model, prompt_str: P) -> String {
     res.0
 }
 
-/// Send a list of messages to a model.
+/// Sends a list of messages to a model.
+///
+/// # Example
+///
+/// ```
+/// use ic_llm::{Model, ChatMessage, Role};
+///
+/// # async fn chat_example() -> String {
+/// ic_llm::chat(
+///     Model::Llama3_1_8B,
+///     vec![
+///         ChatMessage {
+///             role: Role::System,
+///             content: "You are a helpful assistant".to_string(),
+///         },
+///         ChatMessage {
+///             role: Role::User,
+///             content: "How big is the sun?".to_string(),
+///         },
+///     ],
+/// )
+/// .await
+/// # }
+/// ```
 pub async fn chat(model: Model, messages: Vec<ChatMessage>) -> String {
     let llm_canister = Principal::from_text(LLM_CANISTER).expect("invalid canister id");
 
