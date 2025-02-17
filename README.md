@@ -2,11 +2,13 @@
 
 This repo contains libraries and examples of how to use the [LLM canister](https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=w36hm-eqaaa-aaaal-qr76a-cai) on the IC.
 
-## Rust Library (`ic-llm`)
+## Libraries
 
-The `ic-llm` [crate](https://docs.rs/ic-llm/latest/ic_llm/) can be used to deploy rust agents on the Internet Computer with a few lines of code.
+### Rust Library (`ic-llm`)
 
-Example: Prompting
+The `ic-llm` [crate](https://docs.rs/ic-llm/latest/ic_llm/) can be used to deploy Rust agents on the Internet Computer with a few lines of code.
+
+**Example:** Prompting
 
 ```rust
 use ic_llm::Model;
@@ -14,7 +16,7 @@ use ic_llm::Model;
 ic_llm::prompt(Model::Llama3_1_8B, "What's the speed of light?").await;
 ```
 
-Example: Chatting with multiple messages
+**Example:** Chatting with multiple messages
 
 ```rust
 use ic_llm::{Model, ChatMessage, Role};
@@ -35,11 +37,11 @@ ic_llm::chat(
 .await;
 ```
 
-## Motoko Library (`mo:llm`)
+### Motoko Library (`mo:llm`)
 
-Similarly, the `mo:llm` package can be used to deploy motoko agents on the Internet Computer with a few lines of code.
+Similarly, the `mo:llm` package can be used to deploy Motoko agents on the Internet Computer with a few lines of code.
 
-Example: Prompting
+**Example:** Prompting
 
 ```motoko
 import LLM "mo:llm";
@@ -47,7 +49,7 @@ import LLM "mo:llm";
 await LLM.prompt(#Llama3_1_8B, prompt)
 ```
 
-Example: Chatting with multiple messages
+**Example:** Chatting with multiple messages
 
 ```motoko
 import LLM "mo:llm";
@@ -64,6 +66,8 @@ await LLM.chat(#Llama3_1_8B, [
 ])
 ```
 
-## Examples
+## Example Agents
 
-- Agent to lookup ICP balances
+### Agent to lookup ICP balances
+
+This agent specializes in looking up ICP balances, and can serve as an inspiration for how to build agents on the Internet Computer. Implementations in both Rust and Motoko are provided in the `examples` folder.
