@@ -1,0 +1,3 @@
+service : {
+    "chat": (text) -> (text);
+}

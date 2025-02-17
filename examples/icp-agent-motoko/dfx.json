@@ -3,7 +3,7 @@
     "llm": {
       "type": "custom",
       "wasm": "./llm-canister.wasm",
-      "candid": "./.dfx/local/canisters/agent/service.did",
+      "candid": "candid.did",
       "specified_id": "w36hm-eqaaa-aaaal-qr76a-cai"
     },
     "agent": {

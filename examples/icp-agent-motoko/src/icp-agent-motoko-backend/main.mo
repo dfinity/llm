@@ -1,5 +1,7 @@
+import LLM "llm";
+
 actor {
-  public query func greet(name : Text) : async Text {
-    return "Hello, " # name # "!";
+  public func prompt(prompt : Text) : async Text {
+    await LLM.prompt(#Llama3_1_8B, prompt)
   };
 };
