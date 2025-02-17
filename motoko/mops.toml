@@ -1,0 +1,7 @@
+[package]
+name = "llm"
+version = "1.0.0"
+description = "Library for the LLM canister"
+repository = ""
+keywords = [ "llm", "ai", "agent" ]
+license = "MIT"
