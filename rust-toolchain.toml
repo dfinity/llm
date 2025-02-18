@@ -1,0 +1,4 @@
+[toolchain]
+# NOTE: keep in sync with CI workflow
+channel = "1.84.1"
+targets = ["wasm32-unknown-unknown"]
