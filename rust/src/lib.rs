@@ -1,19 +1,19 @@
 //! A library for making requests to the LLM canister on the Internet Computer.
 use candid::{CandidType, Principal};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::fmt;
 
 // The principal of the LLM canister.
 const LLM_CANISTER: &str = "w36hm-eqaaa-aaaal-qr76a-cai";
 
-#[derive(CandidType, Serialize)]
+#[derive(CandidType, Serialize, Deserialize)]
 struct Request {
     model: String,
     messages: Vec<ChatMessage>,
 }
 
 /// The role of a `ChatMessage`.
-#[derive(CandidType, Serialize)]
+#[derive(CandidType, Serialize, Deserialize)]
 pub enum Role {
     #[serde(rename = "system")]
     System,
@@ -22,7 +22,7 @@ pub enum Role {
 }
 
 /// A message in a chat.
-#[derive(CandidType, Serialize)]
+#[derive(CandidType, Serialize, Deserialize)]
 pub struct ChatMessage {
     pub role: Role,
     pub content: String,

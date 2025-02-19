@@ -1,17 +1,13 @@
 import { agent_backend } from "../../declarations/agent-backend";
+import { chat_message } from "../../declarations/agent-backend/agent-backend.did";
 import botImg from "./bot.svg";
 import userImg from "./user.svg";
 
 const PERSON_IMG = userImg;
 const BOT_IMG = botImg;
 
-type ChatMessage = {
-  role: "user" | "system";
-  content: string;
-};
-
 class App {
-  chat: ChatMessage[] = [];
+  chat: chat_message[] = [];
   chatBox: HTMLElement;
   form: HTMLFormElement;
 
@@ -22,7 +18,7 @@ class App {
     this.form.addEventListener("submit", this.#handleSubmit);
 
     this.chat = [{
-        role: "system",
+        role: { system: null },
         content: "I'm a sovereign AI agent living on the Internet Computer. Ask me anything.",
       }
     ];
@@ -42,10 +38,10 @@ class App {
   }
 
   // Appends a message to the chat box.
-  appendMessage(message: ChatMessage) {
-    let side = message.role === "user" ? "right" : "left";
-    let img = message.role === "user" ? PERSON_IMG : BOT_IMG;
-    let name = message.role === "user" ? "User" : "System";
+  appendMessage(message: chat_message) {
+    let side = "user" in message.role ? "right" : "left";
+    let img = "user" in message.role ? PERSON_IMG : BOT_IMG;
+    let name = "user" in message.role ? "User" : "System";
     let text = message.content;
 
     const msgHTML = `
@@ -69,11 +65,11 @@ class App {
 
   askAgent= async () => {
     console.log("asking agent");
-    const response = await agent_backend.chat(this.chat[this.chat.length - 1].content);
+    const response = await agent_backend.chat(this.chat.slice(1));
     console.log(response);
 
     this.chat.push({
-      role: "system",
+      role: { system: null },
       content: response,
     });
 
@@ -88,7 +84,7 @@ class App {
     if (!msgText) return;
 
     this.chat.push({
-      role: "user",
+      role: { user: null },
       content: msgText,
     });
     msgerInput.value = "";
@@ -101,25 +97,6 @@ class App {
   #render() {
     this.clearMessages();
     this.chat.forEach((message) => this.appendMessage(message));
-
-
-    /*let body = html`
-      <main>
-        <img src="${logo}" alt="DFINITY logo" />
-        <br />
-        <br />
-        <form action="#">
-          <label for="name">Enter your name: &nbsp;</label>
-          <input id="name" alt="Name" type="text" />
-          <button type="submit">Click Me!</button>
-        </form>
-        <section id="greeting">${this.greeting}</section>
-      </main>
-    `;
-    render(body, document.getElementById('root'));
-    document
-      .querySelector('form')
-      .addEventListener('submit', this.#handleSubmit);*/
   }
 }
 

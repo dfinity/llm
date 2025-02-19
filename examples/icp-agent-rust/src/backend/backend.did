@@ -1,3 +1,8 @@
-service : {
-    "chat": (text) -> (text);
+type chat_message = record {
+  role: variant { user; system };
+  content: text;
+};
+
+service: {
+  chat: (vec chat_message) -> (text);
 }
