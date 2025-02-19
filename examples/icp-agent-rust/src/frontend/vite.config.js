@@ -1,5 +1,4 @@
 import { defineConfig } from 'vite';
-import { fileURLToPath, URL } from 'url';
 import environment from 'vite-plugin-environment';
 import dotenv from 'dotenv';
 
@@ -30,14 +29,6 @@ export default defineConfig({
     environment("all", { prefix: "DFX_" }),
   ],
   resolve: {
-    alias: [
-      {
-        find: "declarations",
-        replacement: fileURLToPath(
-          new URL("../declarations", import.meta.url)
-        ),
-      },
-    ],
     dedupe: ['@dfinity/agent'],
   },
 });

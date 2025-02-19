@@ -1,4 +1,4 @@
-import { agent_backend } from "declarations/agent-backend";
+import { agent_backend } from "../../declarations/agent-backend";
 import botLogo from "./icp-token.svg";
 
 const PERSON_IMG = "https://image.flaticon.com/icons/svg/145/145867.svg";
