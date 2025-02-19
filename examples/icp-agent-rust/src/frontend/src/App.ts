@@ -1,8 +1,9 @@
 import { agent_backend } from "../../declarations/agent-backend";
-import botLogo from "./icp-token.svg";
+import botImg from "./bot.svg";
+import userImg from "./user.svg";
 
-const PERSON_IMG = "https://image.flaticon.com/icons/svg/145/145867.svg";
-const BOT_IMG = botLogo;
+const PERSON_IMG = userImg;
+const BOT_IMG = botImg;
 
 type ChatMessage = {
   role: "user" | "system";

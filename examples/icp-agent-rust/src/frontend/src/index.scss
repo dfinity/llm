@@ -1,5 +1,4 @@
 :root {
-  --body-bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   --msger-bg: #fff;
   --border: 2px solid #ddd;
   --left-msg-bg: #ececec;
@@ -23,7 +22,6 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-image: var(--body-bg);
   font-family: Helvetica, sans-serif;
 }
 
@@ -81,6 +79,8 @@ body {
   background-position: center;
   background-size: cover;
   border-radius: 50%;
+  min-width: 50px; /* Prevent image from shrinking */
+  flex-shrink: 0; /* Prevent image from shrinking */
 }
 .msg-bubble {
   max-width: 450px;
@@ -140,14 +140,14 @@ body {
 }
 .msger-send-btn {
   margin-left: 10px;
-  background: rgb(0, 196, 65);
+  background: rgb(69, 5, 94);
   color: #fff;
   font-weight: bold;
   cursor: pointer;
   transition: background 0.23s;
 }
 .msger-send-btn:hover {
-  background: rgb(0, 180, 50);
+  background: rgb(69, 5, 94);
 }
 
 .msger-chat {
