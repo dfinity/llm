@@ -12,5 +12,4 @@ crate-type = ["cdylib"]
 [dependencies]
 candid = "0.10"
 ic-cdk = "0.16"
-ic-ledger-types = "0.14.0"
-ic-llm = { path = "../../../../rust" }
+ic-llm = "0.2.0"

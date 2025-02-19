@@ -4,5 +4,7 @@ type chat_message = record {
 };
 
 service: {
+  prompt: (text) -> (text);
+  
   chat: (vec chat_message) -> (text);
 }
