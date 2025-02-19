@@ -4,7 +4,12 @@
       "type": "custom",
       "wasm": "./llm-canister.wasm",
       "candid": "./src/backend/backend.did",
-      "specified_id": "w36hm-eqaaa-aaaal-qr76a-cai"
+      "specified_id": "w36hm-eqaaa-aaaal-qr76a-cai",
+      "remote": {
+        "id": {
+          "ic": "w36hm-eqaaa-aaaal-qr76a-cai"
+        }
+      }
     },
     "agent-backend": {
       "dependencies": [
@@ -22,6 +27,7 @@
         "src/frontend/dist"
       ],
       "type": "assets",
+      "build": ["cd src/frontend && pnpm build"],
       "workspace": "agent-frontend"
     }
   },
