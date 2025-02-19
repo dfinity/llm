@@ -21,7 +21,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
   font-family: Helvetica, sans-serif;
 }
 
@@ -32,11 +31,18 @@ body {
   width: 100%;
   max-width: 867px;
   margin: 25px 10px;
-  height: calc(100% - 50px);
+  height: calc(100dvh - 50px); /* dynamic viewport height */
+  min-height: calc(fill-available - 50px);
+  min-height: calc(-webkit-fill-available - 50px);
   border: var(--border);
   border-radius: 5px;
   background: var(--msger-bg);
   box-shadow: 0 15px 15px -5px rgba(0, 0, 0, 0.2);
+  
+  @media screen and (max-height: 600px) {
+    margin: 0;
+    height: calc(100% - 50px);
+  }
 }
 
 .msger-header {
@@ -52,6 +58,7 @@ body {
   flex: 1;
   overflow-y: auto;
   padding: 10px;
+  background-color: #fcfcfe;
 }
 .msger-chat::-webkit-scrollbar {
   width: 6px;
@@ -148,8 +155,4 @@ body {
 }
 .msger-send-btn:hover {
   background: rgb(69, 5, 94);
-}
-
-.msger-chat {
-  background-color: #fcfcfe;
 }
