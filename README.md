@@ -68,6 +68,14 @@ await LLM.chat(#Llama3_1_8B, [
 
 ## Example Agents
 
-### Agent to lookup ICP balances
+### Quickstart Agent
 
-This agent specializes in looking up ICP balances, and can serve as an inspiration for how to build agents on the Internet Computer. Implementations in both Rust and Motoko are provided in the `examples` folder.
+This is a simple agent that simply relays whatever messages the user gives to the underlying models without any modification.
+It's meant to serve as a boilerplate project for those who want to get started building agents on the IC.
+
+A Rust and a Motoko implementation are provided in the `examples` folder.
+
+Additionally, a live deployment of this agent can be accessed [here](https://vgjrt-uyaaa-aaaal-qsiaq-cai.icp0.io/).
+
+![Screenshot of the quickstart agent](screenshot.png)
+
