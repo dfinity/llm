@@ -2,8 +2,8 @@
   "canisters": {
     "llm": {
       "type": "custom",
-      "wasm": "./llm-canister.wasm",
-      "candid": "candid.did",
+      "wasm": "https://github.com/dfinity/llm/releases/latest/download/llm-canister-ollama.wasm",
+      "candid": "https://github.com/dfinity/llm/releases/latest/download/llm-canister-ollama.did",
       "specified_id": "w36hm-eqaaa-aaaal-qr76a-cai"
     },
     "agent": {
