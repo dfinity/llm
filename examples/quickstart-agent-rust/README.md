@@ -1,4 +1,4 @@
-# Quickstart AI Agent (Motoko)
+# Quickstart AI Agent (Rust)
 
 This is a simple agent that simply relays whatever messages the user gives to the underlying models without any modification.
 It's meant to serve as a boilerplate project for those who want to get started building agents on the IC.
