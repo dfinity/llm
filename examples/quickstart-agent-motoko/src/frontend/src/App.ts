@@ -83,8 +83,14 @@ class App {
         content: response,
       });
     } catch (e) {
-      // Show the error in an alert.
-      alert(e);
+      console.log(e);
+      const eStr = String(e);
+
+      const match = eStr.match(/(SysTransient|CanisterReject), \\+"([^\\"]+)/);
+      if (match) {
+        // Show the error in an alert.
+        alert(match[2]);
+      }
 
       // Remove the "thinking message" from the chat.
       this.chat.pop();
