@@ -71,18 +71,24 @@ class App {
     // "thinking..." message.
     const messages = this.chat.slice(1, -1);
 
-    console.log(`Asking agent: ${messages}`);
-    const response = await agent_backend.chat(messages);
-    console.log(response);
+    try {
+      const response = await agent_backend.chat(messages);
+      console.log(response);
+      // Remove the "thinking message" from the chat.
+      this.chat.pop();
 
-    // Remove the "thinking message" from the chat.
-    this.chat.pop();
+      // Add the agent's response.
+      this.chat.push({
+        role: { system: null },
+        content: response,
+      });
+    } catch (e) {
+      // Show the error in an alert.
+      alert(e);
 
-    // Add the agent's response.
-    this.chat.push({
-      role: { system: null },
-      content: response,
-    });
+      // Remove the "thinking message" from the chat.
+      this.chat.pop();
+    }
 
     // Re-enable the send button.
     const sendButton = document.querySelector(
