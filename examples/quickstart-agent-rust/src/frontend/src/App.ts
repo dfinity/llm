@@ -17,10 +17,12 @@ class App {
 
     this.form.addEventListener("submit", this.#handleSubmit);
 
-    this.chat = [{
+    this.chat = [
+      {
         role: { system: null },
-        content: "I'm a sovereign AI agent living on the Internet Computer. Ask me anything.",
-      }
+        content:
+          "I'm a sovereign AI agent living on the Internet Computer. Ask me anything.",
+      },
     ];
 
     this.#render();
@@ -63,22 +65,39 @@ class App {
     this.chatBox.scrollTop += 500;
   }
 
-  askAgent= async () => {
-    console.log("asking agent");
-    const response = await agent_backend.chat(this.chat.slice(1));
+  askAgent = async () => {
+    // Remove first and last message from chat array
+    // The first one is the dummy system prompt. The last one is the
+    // "thinking..." message.
+    const messages = this.chat.slice(1, -1);
+
+    console.log(`Asking agent: ${messages}`);
+    const response = await agent_backend.chat(messages);
     console.log(response);
 
+    // Remove the "thinking message" from the chat.
+    this.chat.pop();
+
+    // Add the agent's response.
     this.chat.push({
       role: { system: null },
       content: response,
     });
 
+    // Re-enable the send button.
+    const sendButton = document.querySelector(
+      ".msger-send-btn"
+    )! as HTMLButtonElement;
+    sendButton.disabled = false;
+
     this.#render();
-  }
+  };
 
   #handleSubmit = async (e: Event) => {
     e.preventDefault();
-    const msgerInput = document.querySelector(".msger-input")! as HTMLInputElement;
+    const msgerInput = document.querySelector(
+      ".msger-input"
+    )! as HTMLInputElement;
 
     const msgText = msgerInput.value;
     if (!msgText) return;
@@ -88,6 +107,18 @@ class App {
       content: msgText,
     });
     msgerInput.value = "";
+
+    // Add user message to chat and show "thinking..." while waiting for response.
+    this.chat.push({
+      role: { system: null },
+      content: "Thinking...",
+    });
+
+    // Disable the send button.
+    const sendButton = document.querySelector(
+      ".msger-send-btn"
+    )! as HTMLButtonElement;
+    sendButton.disabled = true;
 
     this.#render();
 

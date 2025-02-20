@@ -152,7 +152,17 @@ body {
   font-weight: bold;
   cursor: pointer;
   transition: background 0.23s;
+
+  &:disabled {
+    background: #808080;
+    cursor: not-allowed;
+  }
 }
 .msger-send-btn:hover {
   background: rgb(69, 5, 94);
+
+  &:disabled {
+    background: #808080;
+    cursor: not-allowed;
+  }
 }
