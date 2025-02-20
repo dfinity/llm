@@ -6,9 +6,23 @@
       "candid": "https://github.com/dfinity/llm/releases/latest/download/llm-canister-ollama.did",
       "specified_id": "w36hm-eqaaa-aaaal-qr76a-cai"
     },
-    "agent": {
+    "agent-backend": {
+      "dependencies": [
+        "llm"
+      ],
       "main": "src/backend/main.mo",
       "type": "motoko"
+    },
+    "agent-frontend": {
+      "dependencies": [
+        "agent-backend"
+      ],
+      "source": [
+        "src/frontend/dist"
+      ],
+      "type": "assets",
+      "build": ["cd src/frontend && pnpm build"],
+      "workspace": "agent-frontend"
     }
   },
   "networks": {

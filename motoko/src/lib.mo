@@ -3,12 +3,12 @@ module {
     #Llama3_1_8B;
   };
 
-  type Role = {
+  public type Role = {
     #user;
     #system_;
   };
 
-  type ChatMessage = {
+  public type ChatMessage = {
     role: Role;
     content: Text;
   };
