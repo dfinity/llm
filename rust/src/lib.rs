@@ -6,14 +6,14 @@ use std::fmt;
 // The principal of the LLM canister.
 const LLM_CANISTER: &str = "w36hm-eqaaa-aaaal-qr76a-cai";
 
-#[derive(CandidType, Serialize, Deserialize)]
+#[derive(CandidType, Serialize, Deserialize, Debug)]
 struct Request {
     model: String,
     messages: Vec<ChatMessage>,
 }
 
 /// The role of a `ChatMessage`.
-#[derive(CandidType, Serialize, Deserialize)]
+#[derive(CandidType, Serialize, Deserialize, Debug)]
 pub enum Role {
     #[serde(rename = "system")]
     System,
@@ -22,13 +22,14 @@ pub enum Role {
 }
 
 /// A message in a chat.
-#[derive(CandidType, Serialize, Deserialize)]
+#[derive(CandidType, Serialize, Deserialize, Debug)]
 pub struct ChatMessage {
     pub role: Role,
     pub content: String,
 }
 
 /// Supported LLM models.
+#[derive(Debug)]
 pub enum Model {
     Llama3_1_8B,
 }
