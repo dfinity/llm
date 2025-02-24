@@ -19,6 +19,8 @@ pub enum Role {
     System,
     #[serde(rename = "user")]
     User,
+    #[serde(rename = "assistant")]
+    Assistant,
 }
 
 /// A message in a chat.
