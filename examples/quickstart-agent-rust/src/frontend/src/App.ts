@@ -19,7 +19,7 @@ class App {
 
     this.chat = [
       {
-        role: { system: null },
+        role: { assistant: null },
         content:
           "I'm a sovereign AI agent living on the Internet Computer. Ask me anything.",
       },
@@ -43,7 +43,7 @@ class App {
   appendMessage(message: chat_message) {
     let side = "user" in message.role ? "right" : "left";
     let img = "user" in message.role ? PERSON_IMG : BOT_IMG;
-    let name = "user" in message.role ? "User" : "System";
+    let name = "user" in message.role ? "User" : "Assistant";
     let text = message.content;
 
     const msgHTML = `
@@ -72,6 +72,8 @@ class App {
     const messages = this.chat.slice(1, -1);
 
     try {
+      console.log("Sending the following messages to the backend:");
+      console.log(messages);
       const response = await agent_backend.chat(messages);
       console.log(response);
       // Remove the "thinking message" from the chat.
@@ -79,7 +81,7 @@ class App {
 
       // Add the agent's response.
       this.chat.push({
-        role: { system: null },
+        role: { assistant: null },
         content: response,
       });
     } catch (e) {
@@ -122,7 +124,7 @@ class App {
 
     // Add user message to chat and show "thinking..." while waiting for response.
     this.chat.push({
-      role: { system: null },
+      role: { assistant: null },
       content: "Thinking...",
     });
 

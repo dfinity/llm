@@ -1,5 +1,5 @@
 type chat_message = record {
-  role: variant { user; system };
+  role: variant { user; system; assistant };
   content: text;
 };
 
