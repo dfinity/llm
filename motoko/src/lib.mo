@@ -6,6 +6,7 @@ module {
   public type Role = {
     #user;
     #system_;
+    #assistant;
   };
 
   public type ChatMessage = {
