@@ -21,7 +21,7 @@ class App {
       {
         role: { assistant: null },
         content:
-          "I'm a sovereign AI agent living on the Internet Computer. Ask me anything.",
+          "I'm an agent specializing in looking up ICP balances. Ask me for an ICP balance to lookup.",
       },
     ];
 
