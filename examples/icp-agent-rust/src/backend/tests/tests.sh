@@ -10,9 +10,12 @@ dfx start --background --clean
 
 # Deploy canisters
 dfx deploy agent-backend --no-wallet
+dfx deps deploy ledger
 
 # Call with test prompts in a loop
 for prompt in \
+    "explain to me what you do." \
+    "convert tre5v-ziaaa-aaaal-qsivq-cai to an account id" \
     "Whats my balance?" \
     "Look up my balance: c5553c0e06a0a7f26c76d43f67052940a09548fef8f4082fec3fb3cbaddf1cc5" \
     "How is life?" \
