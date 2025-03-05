@@ -1,7 +1,8 @@
-# Quickstart AI Agent (Rust)
+# ICP Lookup Agent (Rust)
 
-This is a simple agent that simply relays whatever messages the user gives to the underlying models without any modification.
-It's meant to serve as a boilerplate project for those who want to get started building agents on the IC.
+This project is an agent that showcases what it's like to build an agent that specializes in a specific task. In this case, the task is to lookup ICP prices.
+
+It's meant to serve as an example for those who want to get started building agents on the Internet Computer.
 
 ![Screenshot of the quickstart agent](../../screenshot.png)
 
