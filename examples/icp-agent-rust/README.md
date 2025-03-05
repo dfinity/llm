@@ -4,8 +4,9 @@ This project is an agent that showcases what it's like to build an agent that sp
 
 It's meant to serve as an example for those who want to get started building agents on the Internet Computer.
 
-![Screenshot of the quickstart agent](../../screenshot.png)
+[Live Demo](https://twf3b-uqaaa-aaaal-qsiva-cai.icp0.io/)
 
+![Screenshot of the agent](./screenshot.png)
 
 ## Deployment
 
