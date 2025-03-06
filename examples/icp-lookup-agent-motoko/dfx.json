@@ -1,0 +1,50 @@
+{
+  "canisters": {
+    "ledger": {
+      "type": "pull",
+      "id": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+    },
+    "llm": {
+      "type": "custom",
+      "wasm": "https://github.com/dfinity/llm/releases/latest/download/llm-canister-ollama.wasm",
+      "candid": "https://github.com/dfinity/llm/releases/latest/download/llm-canister-ollama.did",
+      "specified_id": "w36hm-eqaaa-aaaal-qr76a-cai"
+    },
+    "agent-backend": {
+      "dependencies": [
+        "llm"
+      ],
+      "main": "src/backend/main.mo",
+      "type": "motoko"
+    },
+    "agent-frontend": {
+      "dependencies": [
+        "agent-backend"
+      ],
+      "source": [
+        "src/frontend/dist"
+      ],
+      "type": "assets",
+      "build": ["cd src/frontend && pnpm build"],
+      "workspace": "agent-frontend"
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "0.0.0.0:8080",
+      "type": "ephemeral"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": "mops sources"
+    },
+    "replica": {
+      "subnet_type": "system"
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1,
+  "dfx": "0.25.0"
+}

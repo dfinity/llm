@@ -1,7 +1,12 @@
-use ic_llm::{ChatMessage, Model, Role};
-use ic_ledger_types::{AccountIdentifier, AccountBalanceArgs, MAINNET_LEDGER_CANISTER_ID, account_balance};
+import Array "mo:base/Array";
+import Ledger "canister:ledger";
+import LLM "mo:llm";
+import Text "mo:base/Text";
+import Nat64 "mo:base/Nat64";
+import Hex "hex";
 
-const SYSTEM_PROMPT: &str = "You are an assistant that specializes in looking up the balance of ICP accounts.
+actor {
+  let SYSTEM_PROMPT = "You are an assistant that specializes in looking up the balance of ICP accounts.
 
 When asked to respond with a certain string, respond with the exact string and don't add anything more.
 
@@ -36,51 +41,36 @@ Follow these steps rigorously:
 - A valid 64-character hexadecimal string consists of characters 0-9, a-f, or A-F, and must be exactly 64 characters long.
 - If multiple 64-character hexadecimal strings are provided, use the first one found.";
 
-/// Lookup the balance of an ICP account.
-async fn lookup_account(account: &str) -> String {
-    if account.len() != 64 {
-        return "Account must be 64 characters long".to_string();
+  // Lookup the balance of an ICP account.
+  public func lookupAccount(account : Text) : async Text {
+    if (Text.size(account) != 64) {
+      return "Account must be 64 characters long";
+    };
+
+    switch (Hex.decode(account)) {
+      case (?accountId) {
+        let balance = await Ledger.account_balance({
+          account = accountId;
+        });
+        return "Balance of " # account # " is " # Nat64.toText(balance.e8s) # " ICP";
+      };
+      case (null) {
+        return "Invalid account";
+      };
     }
+  };
 
-    match AccountIdentifier::from_hex(account) {
-        Ok(account) => {
-            let balance = account_balance(
-                MAINNET_LEDGER_CANISTER_ID,
-                AccountBalanceArgs {
-                    account,
-                }
-            ).await.expect("call to ledger failed");
-
-            format!("Balance of {} is {} ICP", account, balance)
-        }
-        Err(_) => "Invalid account".to_string(),
-    }
-}
-
-#[ic_cdk::update]
-async fn chat(messages: Vec<ChatMessage>) -> String {
+  public func chat(messages : [LLM.ChatMessage]) : async Text {
     // Prepend the system prompt to the messages.
-    let mut all_messages = vec![ChatMessage {
-        role: Role::System,
-        content: SYSTEM_PROMPT.to_string(),
-    }];
-    all_messages.extend(messages);
-    let messages = all_messages;
+    let allMessages = Array.append([{ role = #system_; content = SYSTEM_PROMPT }], messages);
 
-    let answer = ic_llm::chat(
-        Model::Llama3_1_8B,
-        messages,
-    )
-    .await;
-
-    if answer.starts_with("LOOKUP(") {
-        // Extract the account from LOOKUP(account)
-        let account = answer
-            .trim_start_matches("LOOKUP(")
-            .trim_end_matches(")");
-        
-        lookup_account(&account).await
+    let answer = await LLM.chat(#Llama3_1_8B, allMessages);
+    if (Text.startsWith(answer, #text "LOOKUP(")) {
+      // Extract the account from LOOKUP(account)
+      let account = Text.trimStart(Text.trimEnd(answer, #char ')'), #text "LOOKUP(");
+      return await lookupAccount(account);
     } else {
-        answer
-    }
-}
+      return answer;
+    };
+  };
+};
