@@ -1,5 +1,9 @@
 {
   "canisters": {
+    "ledger": {
+      "type": "pull",
+      "id": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+    },
     "llm": {
       "type": "custom",
       "wasm": "https://github.com/dfinity/llm/releases/latest/download/llm-canister-ollama.wasm",

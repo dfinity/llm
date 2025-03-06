@@ -36,28 +36,7 @@ Follow these steps rigorously:
 - A valid 64-character hexadecimal string consists of characters 0-9, a-f, or A-F, and must be exactly 64 characters long.
 - If multiple 64-character hexadecimal strings are provided, use the first one found.";
 
-
-#[ic_cdk::update]
-async fn prompt(prompt_str: String) -> String {
-    ic_llm::prompt(Model::Llama3_1_8B, prompt_str).await
-}
-
-#[ic_cdk::update]
-async fn chat_raw(messages: Vec<ChatMessage>) -> String {
-    let mut all_messages = vec![ChatMessage {
-        role: Role::System,
-        content: SYSTEM_PROMPT.to_string(),
-    }];
-    all_messages.extend(messages);
-    let messages = all_messages;
-
-    ic_llm::chat(
-        Model::Llama3_1_8B,
-        messages,
-    )
-    .await
-}
-
+/// Lookup the balance of an ICP account.
 async fn lookup_account(account: &str) -> String {
     if account.len() != 64 {
         return "Account must be 64 characters long".to_string();
@@ -73,7 +52,6 @@ async fn lookup_account(account: &str) -> String {
             ).await.expect("call to ledger failed");
 
             format!("Balance of {} is {} ICP", account, balance)
-            //format!("TODO: Balance of {} is 100 ICP", account)
         }
         Err(_) => "Invalid account".to_string(),
     }
@@ -81,6 +59,7 @@ async fn lookup_account(account: &str) -> String {
 
 #[ic_cdk::update]
 async fn chat(messages: Vec<ChatMessage>) -> String {
+    // Prepend the system prompt to the messages.
     let mut all_messages = vec![ChatMessage {
         role: Role::System,
         content: SYSTEM_PROMPT.to_string(),

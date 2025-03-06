@@ -1,0 +1,13 @@
+{
+  "canisters": {
+    "ryjl3-tyaaa-aaaaa-aaaba-cai": {
+      "name": "ledger",
+      "wasm_hash": "b51f9bd7a299f546a4254c2e4e61ef44571caf69cf697e50a5b166713d31595b",
+      "wasm_hash_download": "b51f9bd7a299f546a4254c2e4e61ef44571caf69cf697e50a5b166713d31595b",
+      "init_guide": "\n1. Create a 'minter' identity: dfx identity new minter\n2. Run the following multi-line command:\n\ndfx deps init ryjl3-tyaaa-aaaaa-aaaba-cai --argument \"(variant { \n    Init = record {\n        minting_account = \\\"$(dfx --identity minter ledger account-id)\\\";\n        initial_values = vec {};\n        send_whitelist = vec {};\n        transfer_fee = opt record { e8s = 10_000 : nat64; };\n        token_symbol = opt \\\"LICP\\\";\n        token_name = opt \\\"Local ICP\\\"; \n    }\n})\"\n",
+      "init_arg": null,
+      "candid_args": "(LedgerCanisterPayload)",
+      "gzip": true
+    }
+  }
+}
