@@ -1,0 +1,26 @@
+{
+  "canisters": {
+    "llm": {
+      "type": "custom",
+      "wasm": "https://github.com/dfinity/llm/releases/latest/download/llm-canister-ollama.wasm",
+      "candid": "https://github.com/dfinity/llm/releases/latest/download/llm-canister-ollama.did",
+      "specified_id": "w36hm-eqaaa-aaaal-qr76a-cai",
+      "remote": {
+        "id": {
+          "ic": "w36hm-eqaaa-aaaal-qr76a-cai"
+        }
+      }
+    },
+    "agent-backend": {
+      "dependencies": [
+        "llm"
+      ],
+      "type": "azle",
+      "main": "src/backend/index.ts",
+      "declarations": {
+        "output": "test/dfx_generated/hello_world",
+        "node_compatibility": true
+      }
+    }
+  }
+}
