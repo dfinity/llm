@@ -33,5 +33,6 @@
       "build": ["cd src/frontend && pnpm build"],
       "workspace": "agent-frontend"
     }
-  }
+  },
+  "dfx": "0.25.0"
 }
