@@ -1,53 +1,85 @@
 import { IDL, update, call } from 'azle';
-import { chat_message, chat_request, role } from 'azle/canisters/llm/idl';
 
 // TypeScript version of the Rust library
 export namespace ic_llm {
     // The principal of the LLM canister
     const LLM_CANISTER = 'w36hm-eqaaa-aaaal-qr76a-cai';
 
-    // Role enum equivalent
+    // Define a TypeScript enum for Role (more ergonomic to use)
     export enum Role {
         System = 'system',
         User = 'user',
         Assistant = 'assistant'
     }
 
-    // ChatMessage type that works with the IDL system
-    export type ChatMessage = chat_message;
+    // Define the IDL type for role (needed for serialization)
+    export type RoleIdl = { 'user': null } |
+        { 'assistant': null } |
+        { 'system': null };
+    
+    export const Role_IDL = IDL.Variant({
+        'user': IDL.Null,
+        'assistant': IDL.Null,
+        'system': IDL.Null
+    });
 
-    // Utility function to create a ChatMessage with our Role enum
-    export function createChatMessage(role: Role, content: string): ChatMessage {
-        // Create the appropriate role variant based on our Role enum
-        let canisterRole: role;
-        
-        switch(role) {
-            case Role.System:
-                canisterRole = { system: null };
-                break;
-            case Role.User:
-                canisterRole = { user: null };
-                break;
-            case Role.Assistant:
-                canisterRole = { assistant: null };
-                break;
-            default:
-                canisterRole = { user: null }; // Default to user if unknown
-        }
-        
-        return {
-            role: canisterRole,
-            content: content
-        };
+    // Define our preferred TypeScript interface using the enum
+    export interface ChatMessage {
+        content: string;
+        role: Role;
+    }
+    
+    // Define the IDL type constructor with the same name
+    export const ChatMessage = IDL.Record({
+        'content': IDL.Text,
+        'role': Role_IDL
+    });
+
+    // Define the IDL-compatible interface
+    interface ChatMessageIdl { 
+        'content': string; 
+        'role': RoleIdl;
     }
 
-    // Utility function to get the Role enum from a ChatMessage
-    export function getRoleFromMessage(message: ChatMessage): Role {
-        if ('system' in message.role) {
+    // Define our preferred TypeScript interface for requests
+    export interface ChatRequest {
+        model: string;
+        messages: ChatMessage[];
+    }
+    
+    // Define the IDL type constructor with the same name
+    export const ChatRequest = IDL.Record({
+        'model': IDL.Text,
+        'messages': IDL.Vec(ChatMessage)
+    });
+
+    // Define the IDL-compatible interface
+    interface ChatRequestIdl {
+        'model': string;
+        'messages': Array<ChatMessageIdl>;
+    }
+
+    // Conversion functions between our TypeScript types and IDL types (internal use only)
+    function convertToIdlRole(role: Role): RoleIdl {
+        console.log("converting role:", role);
+        switch(role) {
+            case Role.System:
+                return { system: null };
+            case Role.User:
+                return { user: null };
+            case Role.Assistant:
+                return { assistant: null };
+            default:
+                return { user: null }; // Default to user if unknown
+        }
+    }
+
+    function convertFromIdlRole(roleIdl: RoleIdl): Role {
+        if ('system' in roleIdl) {
             return Role.System;
-        } else if ('user' in message.role) {
+        } else if ('user' in roleIdl) {
             return Role.User;
-        } else if ('assistant' in message.role) {
+        } else if ('assistant' in roleIdl) {
             return Role.Assistant;
         } else {
             // Default to User if unknown
@@ -55,9 +87,77 @@ export namespace ic_llm {
         }
     }
 
+    function convertToIdlChatMessage(message: ChatMessage): ChatMessageIdl {
+        return {
+            content: message.content,
+            role: convertToIdlRole(message.role)
+        };
+    }
+
+    function convertFromIdlChatMessage(messageIdl: ChatMessageIdl): ChatMessage {
+        return {
+            content: messageIdl.content,
+            role: convertFromIdlRole(messageIdl.role)
+        };
+    }
+
+    function convertToIdlChatRequest(request: ChatRequest): ChatRequestIdl {
+        return {
+            model: request.model,
+            messages: request.messages.map(convertToIdlChatMessage)
+        };
+    }
+
+    function convertFromIdlChatRequest(requestIdl: ChatRequestIdl): ChatRequest {
+        return {
+            model: requestIdl.model,
+            messages: requestIdl.messages.map(convertFromIdlChatMessage)
+        };
+    }
+
+    // Utility function to create a ChatMessage with our Role enum
+    export function createChatMessage(role: Role, content: string): ChatMessage {
+        return {
+            role: role,
+            content: content
+        };
+    }
+
     // Model enum equivalent
     export enum Model {
         Llama3_1_8B = 'llama3.1:8b'
+    }
+
+    // Helper function to handle the chat request and response
+    async function chat_helper(model: Model, messages: (ChatMessage | ChatMessageIdl)[]): Promise<string> {
+        // Convert our nice TypeScript types to IDL-compatible types
+        const chatRequestIdl: ChatRequestIdl = {
+            model: model,
+            messages: messages.map(message => {
+                // Check if the message is already in IDL format by checking if the role property is an object
+                if (message.role && typeof message.role === 'object') {
+                    return message as ChatMessageIdl;
+                } else {
+                    // Otherwise, convert from ChatMessage to ChatMessageIdl
+                    return convertToIdlChatMessage(message as ChatMessage);
+                }
+            })
+        };
+
+        console.log("chatRequestIdl");
+        console.log(chatRequestIdl);
+
+        const response = await call<[ChatRequestIdl], string>(
+            LLM_CANISTER,
+            'v0_chat',
+            {
+                paramIdlTypes: [ic_llm.ChatRequest],
+                returnIdlType: IDL.Text,
+                args: [chatRequestIdl]
+            }
+        );
+
+        return response;
     }
 
     // Sends a single message to a model
@@ -68,22 +168,8 @@ export namespace ic_llm {
 
     // Sends a list of messages to a model
     export async function chat(model: Model, messages: ChatMessage[]): Promise<string> {
-        const chatRequest: chat_request = {
-            model: model,
-            messages: messages
-        };
-
-        const response = await call<[chat_request], string>(
-            LLM_CANISTER,
-            'v0_chat',
-            {
-                paramIdlTypes: [chat_request],
-                returnIdlType: IDL.Text,
-                args: [chatRequest]
-            }
-        );
-
-        return response;
+        const messages_: (ChatMessage | ChatMessageIdl)[] = messages;
+        return await chat_helper(model, messages_);
     }
 }
 
@@ -94,8 +180,11 @@ export default class {
         return await ic_llm.prompt(ic_llm.Model.Llama3_1_8B, prompt);
     }
 
-    @update([IDL.Vec(chat_message)], IDL.Text)
+    // Use the standard update decorator with the IDL type
+    @update([IDL.Vec(ic_llm.ChatMessage)], IDL.Text)
     async chat(messages: ic_llm.ChatMessage[]): Promise<string> {
+        console.log("messages received");
+        console.log(messages);
         return await ic_llm.chat(ic_llm.Model.Llama3_1_8B, messages);
     }
 }
