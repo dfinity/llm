@@ -1,0 +1,45 @@
+{
+  "name": "@dfinity/llm",
+  "version": "0.1.0",
+  "description": "TypeScript library for interacting with DFINITY's LLM canister on the Internet Computer",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/**/*"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf lib",
+    "prepare": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "example": "ts-node examples/basic-usage.ts"
+  },
+  "keywords": [
+    "dfinity",
+    "internet computer",
+    "ic",
+    "llm",
+    "ai"
+  ],
+  "author": "DFINITY Foundation",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dfinity/llm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dfinity/llm/issues"
+  },
+  "homepage": "https://github.com/dfinity/llm#readme",
+  "dependencies": {
+    "@dfinity/candid": "^2.3.0"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0",
+    "azle": "^0.29.0"
+  },
+  "peerDependencies": {
+    "azle": ">=0.29.0"
+  }
+}

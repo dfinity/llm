@@ -66,6 +66,32 @@ await LLM.chat(#Llama3_1_8B, [
 ])
 ```
 
+### TypeScript Library (`@dfinity/llm`)
+
+The `@dfinity/llm` npm package can be used to deploy TypeScript agents on the Internet Computer with a few lines of code.
+
+**Example:** Prompting
+
+```typescript
+import { prompt, Model } from '@dfinity/llm';
+
+await prompt(Model.Llama3_1_8B, "What's the speed of light?");
+```
+
+**Example:** Chatting with multiple messages
+
+```typescript
+import { chat, Role, createChatMessage, Model } from '@dfinity/llm';
+
+await chat(
+    Model.Llama3_1_8B,
+    [
+        createChatMessage(Role.System, "You are a helpful assistant"),
+        createChatMessage(Role.User, "How big is the sun?"),
+    ]
+);
+```
+
 ## Example Agents
 
 ### Quickstart Agent
