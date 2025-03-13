@@ -1,0 +1,4 @@
+service: () -> {
+    chat: (vec record {content:text; role:variant {user; assistant; system}}) -> (text);
+    prompt: (text) -> (text);
+}

@@ -1,0 +1,10 @@
+type ChatMessage = record {
+  role: variant { user; system; assistant };
+  content: text;
+};
+
+service: {
+  prompt: (text) -> (text);
+  
+  chat: (vec ChatMessage) -> (text);
+}

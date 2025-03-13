@@ -18,9 +18,21 @@
       "type": "azle",
       "main": "src/backend/index.ts",
       "declarations": {
-        "output": "test/dfx_generated/hello_world",
+        "output": "src/frontend/src/canisters/agent-backend",
         "node_compatibility": true
-      }
+      },
+      "candid": "src/backend/backend.did"
+    },
+    "agent-frontend": {
+      "dependencies": [
+        "agent-backend"
+      ],
+      "source": [
+        "src/frontend/dist"
+      ],
+      "type": "assets",
+      "build": ["cd src/frontend && pnpm build"],
+      "workspace": "agent-frontend"
     }
   }
 }
