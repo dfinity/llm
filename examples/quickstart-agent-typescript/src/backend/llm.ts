@@ -88,16 +88,6 @@ function convertToIdlChatMessage(message: ChatMessage): ChatMessageIdl {
 }
 
 /**
- * Creates a ChatMessage with the specified role and content
- */
-export function createChatMessage(role: Role, content: string): ChatMessage {
-  return {
-    role,
-    content,
-  };
-}
-
-/**
  * Helper function to handle the chat request and response
  */
 async function chatHelper(
@@ -133,8 +123,7 @@ async function chatHelper(
  * Sends a single message to a model
  */
 export async function prompt(model: Model, promptStr: string): Promise<string> {
-  const message = createChatMessage(Role.User, promptStr);
-  return await chat(model, [message]);
+  return await chat(model, [{ role: Role.User, content: promptStr }]);
 }
 
 /**
