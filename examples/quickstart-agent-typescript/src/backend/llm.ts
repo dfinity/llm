@@ -55,82 +55,58 @@ interface ChatRequestIdl {
   messages: Array<ChatMessageIdl>;
 }
 
-// Conversion functions between our TypeScript types and IDL types (internal use only)
-function convertToIdlRole(role: Role): RoleIdl {
-  switch (role) {
-    case Role.System:
-      return { system: null };
-    case Role.User:
-      return { user: null };
-    case Role.Assistant:
-      return { assistant: null };
-    default:
-      return { user: null }; // Default to user if unknown
-  }
-}
-
-function convertFromIdlRole(roleIdl: RoleIdl): Role {
-  if ("system" in roleIdl) {
-    return Role.System;
-  } else if ("user" in roleIdl) {
-    return Role.User;
-  } else if ("assistant" in roleIdl) {
-    return Role.Assistant;
-  } else {
-    // Default to User if unknown
-    return Role.User;
-  }
-}
-
-function convertToIdlChatMessage(message: ChatMessage): ChatMessageIdl {
-  return {
-    content: message.content,
-    role: convertToIdlRole(message.role),
-  };
-}
-
-function convertFromIdlChatMessage(messageIdl: ChatMessageIdl): ChatMessage {
-  return {
-    content: messageIdl.content,
-    role: convertFromIdlRole(messageIdl.role),
-  };
-}
-
-function convertToIdlChatRequest(request: ChatRequest): ChatRequestIdl {
-  return {
-    model: request.model,
-    messages: request.messages.map(convertToIdlChatMessage),
-  };
-}
-
-function convertFromIdlChatRequest(requestIdl: ChatRequestIdl): ChatRequest {
-  return {
-    model: requestIdl.model,
-    messages: requestIdl.messages.map(convertFromIdlChatMessage),
-  };
-}
-
-// Utility function to create a ChatMessage with our Role enum
-export function createChatMessage(role: Role, content: string): ChatMessage {
-  return {
-    role: role,
-    content: content,
-  };
-}
-
-// Model enum equivalent
+/**
+ * Model enum for available LLM models
+ */
 export enum Model {
   Llama3_1_8B = "llama3.1:8b",
 }
 
-// Helper function to handle the chat request and response
-async function chat_helper(
+/**
+ * Converts a ChatMessage to its IDL representation
+ */
+function convertToIdlChatMessage(message: ChatMessage): ChatMessageIdl {
+  // Convert role directly here
+  let idlRole: RoleIdl;
+  switch (message.role) {
+    case Role.System:
+      idlRole = { system: null };
+      break;
+    case Role.Assistant:
+      idlRole = { assistant: null };
+      break;
+    case Role.User:
+    default:
+      idlRole = { user: null };
+      break;
+  }
+  
+  return {
+    content: message.content,
+    role: idlRole,
+  };
+}
+
+/**
+ * Creates a ChatMessage with the specified role and content
+ */
+export function createChatMessage(role: Role, content: string): ChatMessage {
+  return {
+    role,
+    content,
+  };
+}
+
+/**
+ * Helper function to handle the chat request and response
+ */
+async function chatHelper(
   model: Model,
   messages: (ChatMessage | ChatMessageIdl)[]
 ): Promise<string> {
   // Convert our nice TypeScript types to IDL-compatible types
   const chatRequestIdl: ChatRequestIdl = {
-    model: model,
+    model,
     messages: messages.map((message) => {
       // Check if the message is already in IDL format by checking if the role property is an object
       if (message.role && typeof message.role === "object") {
@@ -142,7 +118,7 @@ async function chat_helper(
     }),
   };
 
-  const response = await call<[ChatRequestIdl], string>(
+  return await call<[ChatRequestIdl], string>(
     LLM_CANISTER,
     "v0_chat",
     {
@@ -151,21 +127,23 @@ async function chat_helper(
       args: [chatRequestIdl],
     }
   );
-
-  return response;
 }
 
-// Sends a single message to a model
+/**
+ * Sends a single message to a model
+ */
 export async function prompt(model: Model, promptStr: string): Promise<string> {
   const message = createChatMessage(Role.User, promptStr);
   return await chat(model, [message]);
 }
 
-// Sends a list of messages to a model
+/**
+ * Sends a list of messages to a model
+ */
 export async function chat(
   model: Model,
   messages: ChatMessage[]
 ): Promise<string> {
   const messages_: (ChatMessage | ChatMessageIdl)[] = messages;
-  return await chat_helper(model, messages_);
+  return await chatHelper(model, messages_);
 }
