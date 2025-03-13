@@ -1,2 +1,13 @@
 .dfx
 .azle
+
+# generated files
+**/declarations/
+
+ frontend code
+node_modules/
+dist/
+.svelte-kit/
+
+# environment variables
+.env

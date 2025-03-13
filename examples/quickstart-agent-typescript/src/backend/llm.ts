@@ -104,7 +104,7 @@ async function chatHelper(
   model: Model,
   messages: (ChatMessage | ChatMessageIdl)[]
 ): Promise<string> {
-  // Convert our nice TypeScript types to IDL-compatible types
+  // Convert chat messages to IDL types if needed.
   const chatRequestIdl: ChatRequestIdl = {
     model,
     messages: messages.map((message) => {
