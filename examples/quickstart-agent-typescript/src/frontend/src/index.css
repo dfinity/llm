@@ -38,8 +38,10 @@ body {
   border-radius: 5px;
   background: var(--msger-bg);
   box-shadow: 0 15px 15px -5px rgba(0, 0, 0, 0.2);
-  
-  @media screen and (max-height: 600px) {
+}
+
+@media screen and (max-height: 600px) {
+  .msger {
     margin: 0;
     height: calc(100% - 50px);
   }
@@ -152,17 +154,15 @@ body {
   font-weight: bold;
   cursor: pointer;
   transition: background 0.23s;
-
-  &:disabled {
-    background: #808080;
-    cursor: not-allowed;
-  }
+}
+.msger-send-btn:disabled {
+  background: #808080;
+  cursor: not-allowed;
 }
 .msger-send-btn:hover {
   background: rgb(69, 5, 94);
-
-  &:disabled {
-    background: #808080;
-    cursor: not-allowed;
-  }
 }
+.msger-send-btn:hover:disabled {
+  background: #808080;
+  cursor: not-allowed;
+} 
