@@ -10,8 +10,6 @@ export default class {
 
     @update([IDL.Vec(llm.ChatMessage)], IDL.Text)
     async chat(messages: llm.ChatMessage[]): Promise<string> {
-        console.log("messages received");
-        console.log(messages);
         return await llm2.chat(llm2.Model.Llama3_1_8B, messages);
     }
 }
