@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "strict": true,
-        "target": "ES2024",
+        "target": "ES2022",
         "module": "ES2022",
         "moduleResolution": "bundler",
         "allowJs": true,

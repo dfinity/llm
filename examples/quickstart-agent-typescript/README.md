@@ -30,11 +30,11 @@ Once Ollama is running and the model has been downloaded, you can start dfx and 
 
 ### Deployment
 
-This project contains a `mise.toml` file with the versions of `pnpm` and `npm` that it needs. We recommend using `mise`, otherwise you can download `pnpm` and `pnpm` yourself.
+This project contains a `mise.toml` file with the version of `npm` that it needs. We recommend using `mise`, otherwise you can download `npm` yourself.
 
 First, run `npm install` to install the azle backend.
 
-Second, run `pnpm install` in the `src/frontend` directory to install the dependencies for the frontend canister.
+Second, run `npm install` in the `src/frontend` directory to install the dependencies for the frontend canister.
 
 Then, in one terminal window, run:
 
