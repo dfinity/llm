@@ -36,9 +36,9 @@
   "devDependencies": {
     "ts-node": "^10.9.1",
     "typescript": "^5.0.0",
-    "azle": "^0.29.0"
+    "azle": "^0.30.0-rc.0"
   },
   "peerDependencies": {
-    "azle": ">=0.29.0"
+    "azle": ">=0.30.0-rc.0"
   }
 }

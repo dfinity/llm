@@ -13,8 +13,8 @@ importers:
         version: 2.3.0(@dfinity/principal@2.3.0)
     devDependencies:
       azle:
-        specifier: ^0.29.0
-        version: 0.29.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
+        specifier: ^0.30.0-rc.0
+        version: 0.30.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@types/node@22.13.10)(typescript@5.8.2)
@@ -298,8 +298,8 @@ packages:
     resolution: {integrity: sha512-FVnvrKJwpt9LP2lAMl8qZswRNm3T4q9CON+bxldk2iwk3FFpuwhx2FfinyitizWHsVYyaY+y5JzDR0rCMV5yTQ==}
     engines: {node: '>=12.0.0'}
 
-  azle@0.29.0:
-    resolution: {integrity: sha512-a7ENN7p1nhvlWh0meABuvV2P5fDJxOyDSfRW6FUvL6BYvM5XnjXIRbNAJDdqlsyJ3ZT4AxNxVZVB2tCAjHxK7w==}
+  azle@0.30.0:
+    resolution: {integrity: sha512-ak7roN+OtnHS4gWGzQDDk8zt4rGsqxNZxApyuxZTfUzPUOMxaSKOZcpZooyiOV+GrEX0pkHHyJ2NrciRWsjY8Q==}
     hasBin: true
 
   balanced-match@1.0.2:
@@ -1028,7 +1028,7 @@ snapshots:
       pvutils: 1.1.3
       tslib: 2.8.1
 
-  azle@0.29.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0):
+  azle@0.30.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0):
     dependencies:
       '@dfinity/agent': 2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
       '@dfinity/identity-secp256k1': 2.3.0(@dfinity/candid@2.3.0(@dfinity/principal@2.3.0))(@dfinity/principal@2.3.0)
