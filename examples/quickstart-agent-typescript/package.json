@@ -1,6 +1,6 @@
 {
     "dependencies": {
         "@dfinity/llm": "^0.1.1",
-        "azle": "0.30.0-rc.0"
+        "azle": "0.30.0"
     }
 }
