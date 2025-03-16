@@ -30,7 +30,7 @@
         "src/frontend/dist"
       ],
       "type": "assets",
-      "build": ["cd src/frontend && pnpm build"],
+      "build": ["cd src/frontend && npm run build"],
       "workspace": "agent-frontend"
     }
   },
