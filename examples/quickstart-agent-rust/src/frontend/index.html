@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content"
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sovereign AI Agent Quickstart</title>
@@ -11,28 +14,134 @@
   <body>
     <div id="root"></div>
 
-    <section class="msger">
-      <header class="msger-header">
-        <div class="msger-header-title">
-          <i class="fas fa-comment-alt"></i> Sovereign AI Agent Quickstart
-        </div>
-        <div class="msger-header-options">
-          <span><i class="fas fa-cog"></i></span>
+    <div class="app-container">
+      <header class="header">
+        <div class="header-content">
+          <h1 class="logo">Sovereign AI Agent</h1>
+          <nav class="header-buttons">
+            <button class="theme-button">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M12.75 1V4H11.25V1H12.75ZM12 16.5C14.4853 16.5 16.5 14.4853 16.5 12C16.5 9.51472 14.4853 7.5 12 7.5C9.51472 7.5 7.5 9.51472 7.5 12C7.5 14.4853 9.51472 16.5 12 16.5ZM12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18ZM20 12.75H23V11.25H20V12.75ZM3.69129 19.2479L5.81261 17.1266L6.87327 18.1873L4.75195 20.3086L3.69129 19.2479ZM17.1256 18.1874L19.247 20.3087L20.3076 19.248L18.1863 17.1267L17.1256 18.1874ZM12.75 20V23H11.25V20H12.75ZM1 12.75H4V11.25H1V12.75ZM17.1268 5.81287L19.2482 3.69155L20.3088 4.75221L18.1875 6.87354L17.1268 5.81287ZM3.69107 4.75135L5.81239 6.87267L6.87305 5.81201L4.75173 3.69069L3.69107 4.75135Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+            <a href="https://github.com/dfinity/llm/" class="github-button">
+              <span>See on Github</span>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                class="arrow-icon"
+              >
+                <path
+                  d="M7 17L17 7"
+                  stroke="currentColor"
+                  stroke-opacity="0.9"
+                  stroke-width="1.5"
+                />
+                <path
+                  d="M8 7H17V16"
+                  stroke="currentColor"
+                  stroke-opacity="0.9"
+                  stroke-width="1.5"
+                />
+              </svg>
+            </a>
+          </nav>
         </div>
       </header>
 
-      <main class="msger-chat">
-      </main>
+      <main class="main-content">
+        <section class="msger-chat">
+          <!-- Messages will be inserted here -->
+        </section>
 
-      <form class="msger-inputarea">
-        <input
-          type="text"
-          class="msger-input"
-          placeholder="Enter your message..."
-        />
-        <button type="submit" class="msger-send-btn">Send</button>
-      </form>
-    </section>
+        <form class="msger-inputarea">
+          <div class="chat-input">
+            <span class="msger-input">Ask anything…</span>
+            <button type="submit" class="msger-send-btn">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M3.99924 12.0711H18.1414"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                ></path>
+                <path
+                  d="M11.7773 5.70715L18.1413 12.0711L11.7773 18.4351"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                ></path>
+              </svg>
+            </button>
+          </div>
+          <div class="powered-by">
+            <svg
+              width="27"
+              height="12"
+              viewBox="0 0 27 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M21.6629 9.97048C19.9277 9.97048 18.0964 8.83607 17.1972 8.01366C16.214 7.11365 13.5132 4.18403 13.5012 4.17043C11.7292 2.19362 9.34753 0 6.9715 0C4.10907 0 1.61384 1.98162 0.964233 4.60724C1.01383 4.43443 1.92344 2.02882 5.33868 2.02882C7.0739 2.02882 8.90513 3.16322 9.80434 3.98563C10.7875 4.88564 13.4884 7.81526 13.5004 7.82886C15.2716 9.80568 17.6532 11.9993 20.0301 11.9993C22.8917 11.9993 25.3877 10.0177 26.0373 7.39206C25.9877 7.56486 25.0781 9.97048 21.6629 9.97048Z"
+                fill="#29A3DA"
+              />
+              <path
+                d="M13.5004 7.82959C13.494 7.82239 12.7164 6.97918 11.8444 6.05837C11.3732 6.61758 10.694 7.37998 9.91318 8.06479C8.45797 9.34 7.51236 9.608 6.97155 9.608C4.93073 9.608 3.26591 7.98959 3.26591 5.99997C3.26591 4.01036 4.92913 2.40394 6.97155 2.39194C7.04595 2.39194 7.13555 2.39914 7.24435 2.41914C6.63075 2.18394 5.97874 2.02954 5.33953 2.02954C1.92429 2.02954 1.01468 4.43356 0.96428 4.60716C0.853878 5.05436 0.794678 5.52077 0.794678 5.99997C0.794678 9.3088 3.52351 12 6.92675 12C8.34596 12 9.93478 11.2728 11.5716 9.8384C12.3452 9.16 13.0164 8.43519 13.5204 7.85199C13.514 7.84479 13.5076 7.83758 13.5012 7.83038L13.5004 7.82959Z"
+                fill="url(#paint0_linear_803_42082)"
+              />
+              <path
+                d="M13.5003 4.17043C13.5067 4.17763 14.2844 5.02084 15.1564 5.94165C15.6276 5.38244 16.3068 4.62004 17.0876 3.93523C18.5428 2.66002 19.4884 2.39202 20.0292 2.39202C22.07 2.39202 23.7349 4.01043 23.7349 6.00005C23.7349 7.97846 22.0716 9.59607 20.0292 9.60807C19.9548 9.60807 19.8652 9.60087 19.7564 9.58087C20.37 9.81608 21.022 9.97048 21.6612 9.97048C25.0757 9.97048 25.9853 7.56646 26.0357 7.39286C26.1461 6.94565 26.2053 6.47925 26.2053 6.00005C26.2069 2.69122 23.4333 0 20.03 0C18.6108 0 17.066 0.727206 15.4292 2.16162C14.6556 2.84002 13.9844 3.56483 13.4803 4.14803C13.4867 4.15523 13.4931 4.16243 13.4995 4.16963L13.5003 4.17043Z"
+                fill="url(#paint1_linear_803_42082)"
+              />
+              <defs>
+                <linearGradient
+                  id="paint0_linear_803_42082"
+                  x1="10.1732"
+                  y1="11.2152"
+                  x2="1.81552"
+                  y2="2.55991"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop offset="0.22" stop-color="#E51E79" />
+                  <stop offset="0.89" stop-color="#522780" />
+                </linearGradient>
+                <linearGradient
+                  id="paint1_linear_803_42082"
+                  x1="16.8228"
+                  y1="0.790406"
+                  x2="25.1804"
+                  y2="9.44491"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop offset="0.21" stop-color="#E95A24" />
+                  <stop offset="0.68" stop-color="#F3A83B" />
+                </linearGradient>
+              </defs>
+            </svg>
+            Powered by <span class="bold">INTERNET COMPUTER</span>
+          </div>
+        </form>
+      </main>
+    </div>
 
     <script type="module" src="/src/main.js"></script>
   </body>
