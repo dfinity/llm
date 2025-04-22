@@ -41,6 +41,15 @@ pub struct FunctionCall {
     pub arguments: Vec<ToolCallArgument>,
 }
 
+impl FunctionCall {
+    pub fn get(&self, argument: &str) -> Option<String> {
+        self.arguments
+            .iter()
+            .find(|arg| arg.name == argument)
+            .map(|arg| arg.value.clone())
+    }
+}
+
 /// An argument to be provided to a tool.
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct ToolCallArgument {
@@ -170,5 +179,26 @@ mod tests {
         assert_eq!(builder.messages, messages);
         assert_eq!(builder.tools.len(), 1);
         assert_eq!(builder.tools[0], tool);
+    }
+    
+    #[test]
+    fn function_call_get() {
+        let function_call = FunctionCall {
+            name: "test_function".to_string(),
+            arguments: vec![
+                ToolCallArgument {
+                    name: "arg1".to_string(),
+                    value: "value1".to_string(),
+                },
+                ToolCallArgument {
+                    name: "arg2".to_string(),
+                    value: "value2".to_string(),
+                },
+            ],
+        };
+
+        assert_eq!(function_call.get("arg1"), Some("value1".to_string()));
+        assert_eq!(function_call.get("arg2"), Some("value2".to_string()));
+        assert_eq!(function_call.get("arg3"), None);
     }
 }
