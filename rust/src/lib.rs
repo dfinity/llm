@@ -1,34 +1,18 @@
 //! A library for making requests to the LLM canister on the Internet Computer.
-use candid::{CandidType, Principal};
-use serde::{Deserialize, Serialize};
 use std::fmt;
+
+// Define our modules
+mod chat;
+mod tool;
+
+// Re-export public types from modules
+pub use chat::{AssistantMessage, ChatBuilder, ChatMessage, FunctionCall, Response, ToolCall};
+pub use tool::{
+    Function, ParameterBuilder, ParameterType, Parameters, Property, Tool, ToolBuilder,
+};
 
 // The principal of the LLM canister.
 const LLM_CANISTER: &str = "w36hm-eqaaa-aaaal-qr76a-cai";
-
-#[derive(CandidType, Serialize, Deserialize, Debug)]
-struct Request {
-    model: String,
-    messages: Vec<ChatMessage>,
-}
-
-/// The role of a `ChatMessage`.
-#[derive(CandidType, Serialize, Deserialize, Debug)]
-pub enum Role {
-    #[serde(rename = "system")]
-    System,
-    #[serde(rename = "user")]
-    User,
-    #[serde(rename = "assistant")]
-    Assistant,
-}
-
-/// A message in a chat.
-#[derive(CandidType, Serialize, Deserialize, Debug)]
-pub struct ChatMessage {
-    pub role: Role,
-    pub content: String,
-}
 
 /// Supported LLM models.
 #[derive(Debug)]
@@ -57,60 +41,97 @@ impl fmt::Display for Model {
 /// # }
 /// ```
 pub async fn prompt<P: ToString>(model: Model, prompt_str: P) -> String {
-    let llm_canister = Principal::from_text(LLM_CANISTER).expect("invalid canister id");
+    let response = ChatBuilder::new(model)
+        .with_messages(vec![ChatMessage::User {
+            content: prompt_str.to_string(),
+        }])
+        .send()
+        .await;
 
-    let res: (String,) = ic_cdk::call(
-        llm_canister,
-        "v0_chat",
-        (Request {
-            model: model.to_string(),
-            messages: vec![ChatMessage {
-                role: Role::User,
-                content: prompt_str.to_string(),
-            }],
-        },),
-    )
-    .await
-    .unwrap();
-    res.0
+    response.message.content.unwrap_or_default()
 }
 
-/// Sends a list of messages to a model.
+/// Creates a new ChatBuilder with the specified model.
+///
+/// This is a convenience function that returns a ChatBuilder instance initialized with the given model.
+/// You can then chain additional methods to configure the chat request before sending it.
 ///
 /// # Example
 ///
 /// ```
-/// use ic_llm::{Model, ChatMessage, Role};
+/// use ic_llm::{Model, ChatMessage, Response};
 ///
-/// # async fn chat_example() -> String {
-/// ic_llm::chat(
-///     Model::Llama3_1_8B,
-///     vec![
-///         ChatMessage {
-///             role: Role::System,
+/// # async fn chat_example() -> Response {
+/// // Basic usage
+/// ic_llm::chat(Model::Llama3_1_8B)
+///     .with_messages(vec![
+///         ChatMessage::System {
 ///             content: "You are a helpful assistant".to_string(),
 ///         },
-///         ChatMessage {
-///             role: Role::User,
+///         ChatMessage::User {
 ///             content: "How big is the sun?".to_string(),
 ///         },
-///     ],
-/// )
-/// .await
+///     ])
+///     .send()
+///     .await
 /// # }
 /// ```
-pub async fn chat(model: Model, messages: Vec<ChatMessage>) -> String {
-    let llm_canister = Principal::from_text(LLM_CANISTER).expect("invalid canister id");
+///
+/// You can also add tools to the chat:
+///
+/// ```
+/// use ic_llm::{Model, ChatMessage, ParameterType, Response};
+///
+/// # async fn chat_with_tools_example() -> Response {
+/// ic_llm::chat(Model::Llama3_1_8B)
+///     .with_messages(vec![
+///         ChatMessage::System {
+///             content: "You are a helpful assistant".to_string(),
+///         },
+///         ChatMessage::User {
+///             content: "What's the balance of account abc123?".to_string(),
+///         },
+///     ])
+///     .with_tools(vec![
+///         ic_llm::tool("icp_account_balance")
+///             .with_description("Lookup the balance of an ICP account")
+///             .with_parameter(
+///                 ic_llm::ParameterBuilder::new("account", ParameterType::String)
+///                     .with_description("The ICP account to look up")
+///                     .is_required()
+///             )
+///             .build()
+///     ])
+///     .send()
+///     .await
+/// # }
+/// ```
+pub fn chat(model: Model) -> ChatBuilder {
+    ChatBuilder::new(model)
+}
 
-    let res: (String,) = ic_cdk::call(
-        llm_canister,
-        "v0_chat",
-        (Request {
-            model: model.to_string(),
-            messages,
-        },),
-    )
-    .await
-    .unwrap();
-    res.0
+/// Creates a new ToolBuilder with the specified name.
+///
+/// This is a convenience function that returns a ToolBuilder instance initialized with the given name.
+/// You can then chain additional methods to configure the tool before building it.
+///
+/// # Example
+///
+/// ```
+/// use ic_llm::{ParameterType, Response};
+///
+/// # fn tool_example() {
+/// // Basic usage
+/// let weather_tool = ic_llm::tool("get_weather")
+///     .with_description("Get current weather for a location")
+///     .with_parameter(
+///         ic_llm::ParameterBuilder::new("location", ParameterType::String)
+///             .with_description("The location to get weather for")
+///             .is_required()
+///     )
+///     .build();
+/// # }
+/// ```
+pub fn tool<S: Into<String>>(name: S) -> ToolBuilder {
+    ToolBuilder::new(name)
 }
