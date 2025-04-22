@@ -1,4 +1,4 @@
-//! A library for making requests to the LLM canister on the Internet Computer.
+#![doc = include_str!("../README.md")]
 use std::fmt;
 
 // Define our modules
@@ -96,7 +96,7 @@ pub async fn prompt<P: ToString>(model: Model, prompt_str: P) -> String {
 ///         ic_llm::tool("icp_account_balance")
 ///             .with_description("Lookup the balance of an ICP account")
 ///             .with_parameter(
-///                 ic_llm::ParameterBuilder::new("account", ParameterType::String)
+///                 ic_llm::parameter("account", ParameterType::String)
 ///                     .with_description("The ICP account to look up")
 ///                     .is_required()
 ///             )
@@ -125,7 +125,7 @@ pub fn chat(model: Model) -> ChatBuilder {
 /// let weather_tool = ic_llm::tool("get_weather")
 ///     .with_description("Get current weather for a location")
 ///     .with_parameter(
-///         ic_llm::ParameterBuilder::new("location", ParameterType::String)
+///         ic_llm::parameter("location", ParameterType::String)
 ///             .with_description("The location to get weather for")
 ///             .is_required()
 ///     )
@@ -134,4 +134,25 @@ pub fn chat(model: Model) -> ChatBuilder {
 /// ```
 pub fn tool<S: Into<String>>(name: S) -> ToolBuilder {
     ToolBuilder::new(name)
+}
+
+/// Creates a new ParameterBuilder with the specified name and type.
+///
+/// This is a convenience function that returns a ParameterBuilder instance initialized with the given name and type.
+/// You can then chain additional methods to configure the parameter before adding it to a tool.
+///
+/// # Example
+///
+/// ```
+/// use ic_llm::ParameterType;
+///
+/// # fn parameter_example() {
+/// // Basic usage
+/// let location_param = ic_llm::parameter("location", ParameterType::String)
+///     .with_description("The location to get weather for")
+///     .is_required();
+/// # }
+/// ```
+pub fn parameter<S: Into<String>>(name: S, type_: ParameterType) -> ParameterBuilder {
+    ParameterBuilder::new(name, type_)
 }
