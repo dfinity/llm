@@ -6,10 +6,8 @@ mod chat;
 mod tool;
 
 // Re-export public types from modules
-pub use chat::{AssistantMessage, ChatBuilder, ChatMessage, FunctionCall, Response, ToolCall};
-pub use tool::{
-    Function, ParameterBuilder, ParameterType, Parameters, Property, Tool, ToolBuilder,
-};
+pub use chat::{ChatMessage, Response, AssistantMessage, ToolCall, FunctionCall, ChatBuilder};
+pub use tool::{Tool, Function, Parameters, Property, ToolBuilder, ParameterBuilder, ParameterType};
 
 // The principal of the LLM canister.
 const LLM_CANISTER: &str = "w36hm-eqaaa-aaaal-qr76a-cai";
@@ -47,7 +45,7 @@ pub async fn prompt<P: ToString>(model: Model, prompt_str: P) -> String {
         }])
         .send()
         .await;
-
+    
     response.message.content.unwrap_or_default()
 }
 
@@ -134,4 +132,4 @@ pub fn chat(model: Model) -> ChatBuilder {
 /// ```
 pub fn tool<S: Into<String>>(name: S) -> ToolBuilder {
     ToolBuilder::new(name)
-}
+} 
