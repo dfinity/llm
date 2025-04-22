@@ -180,7 +180,7 @@ mod tests {
         assert_eq!(builder.tools.len(), 1);
         assert_eq!(builder.tools[0], tool);
     }
-    
+
     #[test]
     fn function_call_get() {
         let function_call = FunctionCall {
