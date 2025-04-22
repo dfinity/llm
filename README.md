@@ -8,35 +8,6 @@ This repo contains libraries and examples of how to use the [LLM canister](https
 
 The `ic-llm` [crate](https://docs.rs/ic-llm/latest/ic_llm/) can be used to deploy Rust agents on the Internet Computer with a few lines of code.
 
-**Example:** Prompting
-
-```rust
-use ic_llm::Model;
-
-ic_llm::prompt(Model::Llama3_1_8B, "What's the speed of light?").await;
-```
-
-**Example:** Chatting with multiple messages
-
-```rust
-use ic_llm::{Model, ChatMessage, Role};
-
-ic_llm::chat(
-    Model::Llama3_1_8B,
-    vec![
-        ChatMessage {
-            role: Role::System,
-            content: "You are a helpful assistant".to_string(),
-        },
-        ChatMessage {
-            role: Role::User,
-            content: "How big is the sun?".to_string(),
-        },
-    ],
-)
-.await;
-```
-
 ### Motoko Library (`mo:llm`)
 
 Similarly, the `mo:llm` package can be used to deploy Motoko agents on the Internet Computer with a few lines of code.
