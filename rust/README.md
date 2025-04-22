@@ -124,10 +124,3 @@ async fn get_weather(location: &str) -> String {
     format!("Weather in {}: Sunny, 72°F", location)
 }
 ```
-
-## Examples
-
-For complete examples, check out the example agents in the repository:
-
-- [Quickstart Agent](https://github.com/dfinity/llm/tree/main/examples/quickstart-agent-rust)
-- [ICP Lookup Agent](https://github.com/dfinity/llm/tree/main/examples/icp-lookup-agent-rust)
