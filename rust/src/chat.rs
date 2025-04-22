@@ -38,8 +38,14 @@ pub struct ToolCall {
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct FunctionCall {
     pub name: String,
-    // The arguments, JSON-encoded
-    pub arguments: String,
+    pub arguments: Vec<ToolCallArgument>,
+}
+
+/// An argument to be provided to a tool.
+#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct ToolCallArgument {
+    pub name: String,
+    pub value: String,
 }
 
 // Internal request type sent to the canister
