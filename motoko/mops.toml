@@ -1,7 +1,13 @@
 [package]
 name = "llm"
-version = "1.2.0"
+version = "2.0.0"
 description = "Library for the LLM canister"
-repository = "https://github.com/dfinity/llm"
+repository = "https://github.com/dfinity/llm/motoko"
 keywords = [ "llm", "ai", "agent" ]
 license = "MIT"
+
+[dependencies]
+base = "0.14.9"
+
+[dev-dependencies]
+test = "2.1.1"
