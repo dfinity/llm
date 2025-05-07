@@ -4,67 +4,19 @@ This repo contains libraries and examples of how to use the [LLM canister](https
 
 ## Libraries
 
+The following libraries can be used to build AI agents on the Internet Computer with a few lines of code.
+
 ### Rust Library (`ic-llm`)
 
-The `ic-llm` [crate](https://docs.rs/ic-llm/latest/ic_llm/) can be used to deploy Rust agents on the Internet Computer with a few lines of code.
+[Documentation](https://docs.rs/ic-llm/latest/ic_llm/)
 
 ### Motoko Library (`mo:llm`)
 
-Similarly, the `mo:llm` package can be used to deploy Motoko agents on the Internet Computer with a few lines of code.
-
-**Example:** Prompting
-
-```motoko
-import LLM "mo:llm";
-
-await LLM.prompt(#Llama3_1_8B, prompt)
-```
-
-**Example:** Chatting with multiple messages
-
-```motoko
-import LLM "mo:llm";
-
-await LLM.chat(#Llama3_1_8B, [
-  {
-    role = #system_;
-    content = "You are a helpful assistant.";
-  },
-  {
-    role = #user;
-    content = "How big is the sun?";
-  }
-])
-```
+[Documentation](https://mops.one/llm)
 
 ### TypeScript Library (`@dfinity/llm`)
 
-The `@dfinity/llm` npm package can be used to deploy TypeScript agents on the Internet Computer with a few lines of code.
-
-**Example:** Prompting
-
-```typescript
-import * as llm from "@dfinity/llm";
-
-await llm.prompt(llm.Model.Llama3_1_8B, "What's the speed of light?");
-```
-
-**Example:** Chatting with multiple messages
-
-```typescript
-import * as llm from "@dfinity/llm";
-
-await llm.chat(llm.Model.Llama3_1_8B, [
-  {
-    content: "You are a helpful assistant.",
-    role: llm.Role.System,
-  },
-  {
-    content: "How big is the sun?",
-    role: llm.Role.User,
-  }
-]);
-```
+[Documentation](https://www.npmjs.com/package/@dfinity/llm)
 
 ## Example Agents
 
