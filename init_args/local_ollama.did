@@ -1,0 +1,6 @@
+(
+    null,
+    opt record {
+        backend = variant { "local-ollama" }
+    }
+)

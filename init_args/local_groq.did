@@ -1,0 +1,7 @@
+(
+    null,
+    opt record {
+        backend = variant { "local-groq" }
+        api_key = variant { "YOUR_API_KEY" }
+    }
+)
