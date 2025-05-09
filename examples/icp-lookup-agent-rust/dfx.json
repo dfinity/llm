@@ -13,7 +13,8 @@
         "id": {
           "ic": "w36hm-eqaaa-aaaal-qr76a-cai"
         }
-      }
+      },
+      "init_arg_file": "../../init_args/local_ollama.did"
     },
     "agent-backend": {
       "dependencies": [
