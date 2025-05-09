@@ -6,8 +6,8 @@
     },
     "llm": {
       "type": "custom",
-      "wasm": "https://github.com/dfinity/llm/releases/latest/download/llm-canister-ollama.wasm",
-      "candid": "https://github.com/dfinity/llm/releases/latest/download/llm-canister-ollama.did",
+      "wasm": "https://github.com/dfinity/llm/releases/v0.1.2/download/llm-canister-ollama.wasm",
+      "candid": "https://github.com/dfinity/llm/releases/v0.1.2/download/llm-canister-ollama.did",
       "specified_id": "w36hm-eqaaa-aaaal-qr76a-cai",
       "remote": {
         "id": {
