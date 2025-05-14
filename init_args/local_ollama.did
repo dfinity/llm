@@ -1,6 +1,1 @@
-(
-    null,
-    opt record {
-        backend = variant { "local-ollama" }
-    }
-)
+(opt variant { ollama }, null)

@@ -1,7 +1,7 @@
 (
-    null,
-    opt record {
-        backend = variant { "local-groq" }
-        api_key = variant { "YOUR_API_KEY" }
-    }
+    opt variant { 
+        groq = record { 
+            api_key = "API_KEY"
+        } 
+    }, null
 )
