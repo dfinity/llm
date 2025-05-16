@@ -42,10 +42,12 @@ Then, in one terminal window, run:
 dfx start --clean
 ```
 
-Then deploy the canisters in another window:
+Then pull the dependency and deploy the canisters in another window:
 
 ```bash
+dfx deps pull
 dfx deploy
+dfx deps deploy  # deploys the llm canister
 ```
 
 Once the deployment completes, you'll see the URL for the `agent-frontend` that looks like this:
