@@ -1,7 +1,7 @@
 (
     opt variant { 
         groq = record { 
-            api_key = "API_KEY"
+            api_key = "{YOUR_API_KEY}"
         } 
     }, null
 )
