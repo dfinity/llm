@@ -2,8 +2,7 @@
   "canisters": {
     "llm": {
       "type": "pull",
-      "id": "w36hm-eqaaa-aaaal-qr76a-cai",
-      "init_arg_file": "../../init_args/ollama.did"
+      "id": "w36hm-eqaaa-aaaal-qr76a-cai"
     },
     "agent-backend": {
       "dependencies": [

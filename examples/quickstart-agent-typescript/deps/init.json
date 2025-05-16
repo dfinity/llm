@@ -1,0 +1,8 @@
+{
+  "canisters": {
+    "w36hm-eqaaa-aaaal-qr76a-cai": {
+      "arg_str": "(opt variant { ollama }, null)",
+      "arg_raw": "4449444c076e016b038db8afa30402fee0f8cc0c7fa6f1c2c40d7f6c01bac0a8ee03716e046c02bdbba7c8020581b2f3e70e7e6b02a1f2a7027ff4c5e0e204066d68020003010200"
+    }
+  }
+}
