@@ -59,3 +59,4 @@ Due to CORS policies on the browser, you should instead access the agent using t
 ```
 http://{FRONTEND_CANISTER_ID}.localhost:8080
 ```
+
