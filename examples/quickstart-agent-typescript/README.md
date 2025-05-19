@@ -5,32 +5,6 @@ It's meant to serve as a boilerplate project for those who want to get started b
 
 ![Screenshot of the quickstart agent](../../screenshot.png)
 
-## Quickstart
-Prerequisites
-- [DFX](https://internetcomputer.org/docs/current/developer-docs/smart-contracts/getting-started/hello10mins) installed
-- [Ollama](https://ollama.com/) installed
-- [PNPM](https://pnpm.io/) installed
-
-```bash
-# start ollama server
-ollama serve
-
-# Download the required model (one-time setup):
-ollama run llama3.1:8b
-
-# Start the local Internet Computer:
-dfx start --clean
-
-# Deploy the canisters:
-dfx deploy
-dfx deps deploy
-```
-
-Finally, access the agent at:
-```
-http://{FRONTEND_CANISTER_ID}.localhost:8080
-```
-
 ## Deployment
 
 ### LLM Backend Configuration
