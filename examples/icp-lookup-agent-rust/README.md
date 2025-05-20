@@ -8,9 +8,9 @@ It's meant to serve as an example for those who want to get started building age
 
 ![Screenshot of the agent](./screenshot.png)
 
-## Quickstart
+## Quickstart with Ollama
 Prerequisites
-- [DFX](https://internetcomputer.org/docs/current/developer-docs/smart-contracts/getting-started/hello10mins) installed
+- [DFX](https://internetcomputer.org/docs/building-apps/getting-started/install) installed
 - [Ollama](https://ollama.com/) installed
 - [PNPM](https://pnpm.io/) installed
 
@@ -45,7 +45,6 @@ The LLM canister supports two backend options for processing prompts:
 
 You can select your preferred backend by initialising the llm dependency through `dfx deps init` (see below for init arguments).
 
-> **Note**: The llm canister currently only supports LLama3.1 8B independently of the backend that you choose. Further model support will be added in the near future.
 
 #### Configure with Ollama
 To be able to test the agent locally, you'll need a server for processing the agent's prompts. For that, we'll use `ollama`, which is a tool that can download and serve LLMs.
