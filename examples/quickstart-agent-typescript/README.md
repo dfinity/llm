@@ -5,11 +5,19 @@ It's meant to serve as a boilerplate project for those who want to get started b
 
 ![Screenshot of the quickstart agent](../../screenshot.png)
 
-
 ## Deployment
 
-### Running Ollama
+### LLM Backend Configuration
+The LLM canister supports two backend options for processing prompts:
 
+1. **Ollama (Local)**: A free, self-hosted solution that runs on your local machine. Perfect for testing and development without any costs.
+
+2. **Groq API**: A cloud-based solution that can handle larger models that might be too resource-intensive for local machines. Requires an API key (free for testing).
+
+You can select your preferred backend by initialising the llm dependency through `dfx deps init` (see below for init arguments).
+
+
+#### Configure with Ollama
 To be able to test the agent locally, you'll need a server for processing the agent's prompts. For that, we'll use `ollama`, which is a tool that can download and serve LLMs.
 See the documentation on the [Ollama website](https://ollama.com/) to install it. Once it's installed, run:
 
@@ -26,14 +34,18 @@ ollama run llama3.1:8b
 
 The above command will download an 8B parameter model, which is around 4GiB. Once the command executes and the model is loaded, you can terminate it. You won't need to do this step again.
 
-Once Ollama is running and the model has been downloaded, you can start dfx and deploy the canisters.
+Initialise the llm canister with `dfx deps init llm --argument '(opt variant { ollama }, null)'`. You can also inspect `deps/init.json` to see which backend will be used when launching the canister.
+This backend is also the default backend and thus will work without calling the initialisation if the `deps/init.json` has not been changed.
+
+
+#### Configure with Groq
+As an alternative you can use the [Groq API](https://console.groq.com/home). You will need to create an [API key](https://console.groq.com/keys) first (free for testing purposes).
+
+Initialise the llm canister with `dfx deps init llm --argument '(opt variant { groq = record { api_key = "{YOUR_API_KEY}" } }, null)'`, replacing `YOUR_API_KEY` with your own. You can also inspect `deps/init.json` to see which backend will be used when launching the canister.
 
 ### Deployment
-
-This project contains a `mise.toml` file with the version of `npm` that it needs. We recommend using `mise`, otherwise you can download `npm` yourself.
-
+Once your backend is set and initialized, you can start dfx and deploy the canisters.
 First, run `npm install` to install the azle backend.
-
 Second, run `npm install` in the `src/frontend` directory to install the dependencies for the frontend canister.
 
 Then, in one terminal window, run:
