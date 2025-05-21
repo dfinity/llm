@@ -33,14 +33,14 @@ import LLM "mo:llm";
 
 actor {
   public func example() {
-    let response = await LLM.chat(#Llama3_1_8B).withMessages ([
+    let response = await LLM.chat(#Llama3_1_8B).withMessages([
       #system_ {
         content = "You are a helpful assistant.";
       },
-      #user_ {
+      #user {
         content = "How big is the sun?";
       },
-    ].send();
+    ]).send();
   };
 }
 ```
