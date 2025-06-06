@@ -1,6 +1,6 @@
 # `@dfinity/llm`
 
-A library for making requests to the LLM canister on the Internet Computer.
+A TypeScript library for making requests to the LLM canister on the Internet Computer.
 
 ## Supported Models
 
@@ -9,6 +9,50 @@ The following LLM models are available:
 - `Model.Llama3_1_8B` - Llama 3.1 8B model
 - `Model.Qwen3_32B` - Qwen 3 32B model
 - `Model.Llama4Scout` - Llama 4 Scout model
+
+## Local Development Setup
+
+Before using this library in local development, you need to set up the LLM canister dependency:
+
+### Prerequisites
+- [DFX](https://internetcomputer.org/docs/building-apps/getting-started/install) installed
+- [Ollama](https://ollama.com/) installed and running locally
+
+### Setup Steps
+
+1. **Start Ollama** (required for local development):
+```bash
+# Start the Ollama server
+ollama serve
+
+# Download the required model (one-time setup)
+ollama run llama3.1:8b
+```
+
+2. **Add LLM canister to your dfx.json**:
+```json
+{
+  "canisters": {
+    "llm": {
+      "type": "pull",
+      "id": "w36hm-eqaaa-aaaal-qr76a-cai"
+    },
+    "your-canister": {
+      "dependencies": ["llm"],
+      "type": "azle"
+    }
+  }
+}
+```
+
+3. **Deploy locally**:
+```bash
+dfx start --clean
+dfx deps pull
+dfx deps deploy
+dfx deploy
+```
+
 
 ## Install
 
