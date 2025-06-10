@@ -50,7 +50,14 @@ dfx deploy
 ## Install
 
 ```bash
+# Using npm
 npm install @dfinity/llm
+
+# Using pnpm
+pnpm add @dfinity/llm
+
+# Using yarn
+yarn add @dfinity/llm
 ```
 
 ## Usage

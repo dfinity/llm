@@ -10,13 +10,13 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf lib",
-    "prepare": "npm run build",
+    "prepare": "pnpm run build",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "tsc --noEmit --strict",
     "type-check": "tsc --noEmit",
-    "ci": "npm run lint && npm run test && npm run build"
+    "ci": "pnpm run lint && pnpm run test && pnpm run build"
   },
   "keywords": [
     "dfinity",
