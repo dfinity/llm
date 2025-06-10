@@ -2,8 +2,6 @@
 
 This repo contains libraries and examples of how to use the [LLM canister](https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=w36hm-eqaaa-aaaal-qr76a-cai) on the IC.
 
-For more context about the LLM canister and its architecture, see the [forum announcement post](https://forum.dfinity.org/t/introducing-the-llm-canister-deploy-ai-agents-with-a-few-lines-of-code/41424).
-
 ## Libraries
 
 The following libraries can be used to build AI agents on the Internet Computer with a few lines of code.
@@ -30,9 +28,10 @@ The following libraries can be used to build AI agents on the Internet Computer 
 This is a simple agent that simply relays whatever messages the user gives to the underlying models without any modification.
 It's meant to serve as a boilerplate project for those who want to get started building agents on the IC.
 
-A Rust and a Motoko implementation are provided in the `examples` folder.
+Rust, Motoko, and TypeScript implementations are provided in the `examples` folder.
 - [Rust Quickstart Agent](examples/quickstart-agent-rust/README.md)
 - [Motoko Quickstart Agent](examples/quickstart-agent-motoko/README.md)
+- [TypeScript Quickstart Agent](examples/quickstart-agent-typescript/README.md)
 
 
 Additionally, a live deployment of this agent can be accessed [here](https://vgjrt-uyaaa-aaaal-qsiaq-cai.icp0.io/).
@@ -52,79 +51,6 @@ Additionally, a live deployment of this agent can be accessed [here](https://twf
 
 ![Screenshot of the ICP lookup agent](./examples/icp-lookup-agent-rust/screenshot.png)
 
-
-
-## Quick Start - Local Development
-
-### Prerequisites
-- [DFX](https://internetcomputer.org/docs/building-apps/getting-started/install) installed
-- [Ollama](https://ollama.com/) installed and running
-- [PNPM](https://pnpm.io/) installed (for frontend examples)
-
-### 1. Set up Ollama (Required for Local Development)
-
-For local development, you'll need to run Ollama to process LLM requests:
-
-```bash
-# Start the Ollama server
-ollama serve
-
-# Download the required model (one-time setup)
-ollama run llama3.1:8b
-```
-
-**Important**: The LLM canister deployed locally uses Ollama for processing, unlike the mainnet deployment which uses dedicated AI workers managed by DFINITY.
-
-### 2. Configure dfx.json
-
-Add the LLM canister to your project's `dfx.json`:
-
-```json
-{
-  "canisters": {
-    "llm": {
-      "type": "pull",
-      "id": "w36hm-eqaaa-aaaal-qr76a-cai"
-    },
-    "your-canister": {
-      "dependencies": ["llm"],
-      // ... your other canister config
-    }
-  }
-}
-```
-
-### 3. Deploy Locally
-
-```bash
-# Start the local Internet Computer
-dfx start --clean
-
-# Pull and deploy the LLM canister dependency
-dfx deps pull
-dfx deps deploy
-
-# Deploy your canisters
-dfx deploy
-```
-
-### 4. Configure the LLM Backend (Optional)
-
-The LLM canister supports two backends:
-
-- **Ollama (Default for Local)**: Uses your local Ollama installation
-- **Groq API**: Cloud-based solution requiring an API key
-
-For Ollama (default):
-```bash
-dfx deps init llm --argument '(opt variant { ollama }, null)'
-```
-
-For Groq API:
-```bash
-dfx deps init llm --argument '(opt variant { groq = record { api_key = "YOUR_API_KEY" } }, null)'
-```
-
 ## Understanding Chat Message Roles
 
 When building chat applications, you'll work with different message types that serve specific purposes:
@@ -142,3 +68,37 @@ Example conversation flow:
 5. **Assistant**: "The current ICP price is $10.50"
 
 
+## How Does it Work?
+The processing of LLM prompts is done by what we call “AI workers”. These are stateless nodes set up for the sole purpose of processing LLM prompts.
+
+Here’s a clarifying diagram:
+![Architecture overview](llm_canister_arch.png)
+
+
+1. Canisters send prompts to the LLM canister.
+2. The LLM canister stores these prompts in a queue.
+3. AI workers continuously poll the LLM canister for prompts.
+4. AI workers execute the prompts and return the response to the LLM canister, which returns it to the calling canister.
+
+
+# FAQ
+**Q**: What models are supported?
+**A**: For now, only the Llama 3.1 8B is supported. More models, based on your feedback, will be made available.
+
+**Q**: What is the cost of using the LLM canister?
+**A**: It’s free for now. As the system and use-cases mature we can evaluate and set the costs accordingly.
+
+**Q**: Are there any limitations on the prompts I can make?
+**A**: Yes. We’ve added a few limitations on how big the prompts and answers can be, and will gradually improve these over time:
+ - A chat request can have a maximum of 10 messages.
+ - The prompt length, across all the messages, must not exceed 10KiB.
+ - The output is limited to 1000 tokens.
+
+**Q**: Are my prompts private?
+**A**: Yes and no. The Internet Computer as a whole doesn’t yet guarantee confidentiality, and the same is true for the AI workers. Someone who has an AI worker running can in theory see the prompts, but cannot identify who made the prompt. For DFINITY specifically, we do not log these prompts, but do log aggregated metrics like the number of requests, number of input/output tokens, etc.
+
+**Q**: What is the principal of the LLM canister?
+**A**: w36hm-eqaaa-aaaal-qr76a-cai
+
+**Q**: Where is the source-code of the LLM canister?
+**A**: It is not yet open-source, as the current implementation is mostly a throw-away prototype, but it will be open-sourced eventually as this work matures.
