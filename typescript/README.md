@@ -2,6 +2,8 @@
 
 A TypeScript library for making requests to the LLM canister on the Internet Computer.
 
+[![TypeScript Tests](https://github.com/dfinity/llm/actions/workflows/typescript-tests.yml/badge.svg)](https://github.com/dfinity/llm/actions/workflows/typescript-tests.yml)
+
 ## Local Development Setup
 
 Before using this library in local development, you need to set up the LLM canister dependency:

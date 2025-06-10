@@ -1,0 +1,98 @@
+name: TypeScript Library Tests
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'typescript/**'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'typescript/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: typescript/package-lock.json
+
+    - name: Install dependencies
+      working-directory: ./typescript
+      run: npm ci
+
+    - name: Run tests
+      working-directory: ./typescript
+      run: npm test
+
+    - name: Run tests with coverage
+      working-directory: ./typescript
+      run: npm run test:coverage
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        directory: ./typescript/coverage
+        flags: typescript
+        name: typescript-coverage
+        fail_ci_if_error: false
+
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: typescript/package-lock.json
+
+    - name: Install dependencies
+      working-directory: ./typescript
+      run: npm ci
+
+    - name: Build library
+      working-directory: ./typescript
+      run: npm run build
+
+    - name: Check types
+      working-directory: ./typescript
+      run: npx tsc --noEmit
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: typescript/package-lock.json
+
+    - name: Install dependencies
+      working-directory: ./typescript
+      run: npm ci
+
+    - name: Run TypeScript compiler check
+      working-directory: ./typescript
+      run: npx tsc --noEmit --strict 
