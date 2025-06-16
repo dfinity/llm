@@ -1,15 +1,8 @@
 {
   "canisters": {
     "llm": {
-      "type": "custom",
-      "wasm": "/Users/david.schmidig/Documents/cod/dfinity/ai-worker/llm-canister-ollama.wasm",
-      "candid": "/Users/david.schmidig/Documents/cod/dfinity/ai-worker/llm-canister-ollama.did",
-      "specified_id": "w36hm-eqaaa-aaaal-qr76a-cai",
-      "remote": {
-        "id": {
-          "ic": "w36hm-eqaaa-aaaal-qr76a-cai"
-        }
-      }
+      "type": "pull",
+      "id": "w36hm-eqaaa-aaaal-qr76a-cai"
     },
     "agent-backend": {
       "dependencies": [
@@ -48,5 +41,5 @@
   },
   "output_env_file": ".env",
   "version": 1,
-  "dfx": "0.27.0"
+  "dfx": "0.25.0"
 }
