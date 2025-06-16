@@ -6,9 +6,9 @@ type assistant_message = record {
   };
 };
 type backend_config = variant {
-  groq : record { api_key : text };
   worker;
   ollama;
+  openrouter : record { api_key : text };
 };
 type chat_message_v0 = record {
   content : text;
