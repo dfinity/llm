@@ -1,6 +1,6 @@
 {
   "name": "@dfinity/llm",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "TypeScript library for interacting with DFINITY's LLM canister on the Internet Computer",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
