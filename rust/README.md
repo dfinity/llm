@@ -30,7 +30,7 @@ ollama serve
 ollama run llama3.1:8b
 ```
 
-2. **Add LLM canister to your dfx.json**:
+2. **Add LLM canister to your dfx.json** (Note: This only works for dfx <=0.25.0):
 ```json
 {
   "canisters": {
@@ -45,6 +45,19 @@ ollama run llama3.1:8b
     }
   }
 }
+```
+
+Alternatively you can also define the llm dependency like this:
+```json
+    "llm": {
+      "candid": "https://github.com/dfinity/llm/releases/latest/download/llm-canister-ollama.did",
+      "type": "custom",
+      "specified_id": "w36hm-eqaaa-aaaal-qr76a-cai",
+      "remote": {
+        "id": {
+          "ic": "w36hm-eqaaa-aaaal-qr76a-cai"
+        }
+      },
 ```
 
 3. **Deploy locally**:
