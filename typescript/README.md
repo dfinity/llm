@@ -28,13 +28,61 @@ export default class {
 
 ```typescript
 import { IDL, update } from "azle";
-import { chat_message as ChatMessageIDL } from "azle/canisters/llm/idl";
 import * as llm from "@dfinity/llm";
 
 export default class {
-  @update([IDL.Vec(ChatMessageIDL)], IDL.Text)
+  @update([IDL.Vec(llm.ChatMessage)], IDL.Text)
   async chat(messages: llm.ChatMessage[]): Promise<string> {
-    return await llm.chat(llm.Model.Llama3_1_8B, messages);
+    const response = await llm.chat(llm.Model.Llama3_1_8B)
+      .withMessages(messages)
+      .send();
+    
+    return response.message.content || "";
+  }
+}
+```
+
+### Tool Calls
+
+```typescript
+import { IDL, update } from "azle";
+import * as llm from "@dfinity/llm";
+
+export default class {
+  @update([IDL.Text], llm.Response)
+  async chatWithTools(userMessage: string): Promise<llm.Response> {
+    const messages: llm.ChatMessage[] = [
+      {
+        role: "user",
+        content: userMessage
+      }
+    ];
+
+    // Define a tool that allows the LLM to get weather information for a location
+    const tools: llm.Tool[] = [
+      {
+        type: "function",
+        function: {
+          name: "get_weather",
+          description: "Get the current weather for a location",
+          parameters: {
+            type: "object",
+            properties: {
+              location: {
+                type: "string",
+                description: "The city and state, e.g. San Francisco, CA"
+              }
+            },
+            required: ["location"]
+          }
+        }
+      }
+    ];
+
+    return await llm.chat(llm.Model.Llama3_1_8B)
+      .withMessages(messages)
+      .withTools(tools)
+      .send();
   }
 }
 ```

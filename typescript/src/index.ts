@@ -3,169 +3,178 @@ import { IDL, call } from "azle";
 // The principal of the LLM canister
 const LLM_CANISTER = "w36hm-eqaaa-aaaal-qr76a-cai";
 
-// Define a TypeScript enum for Role (more ergonomic to use)
-export enum Role {
-  System = "system",
-  User = "user",
-  Assistant = "assistant",
-}
-
-// Define the IDL type for role (needed for serialization)
-export type RoleIdl = { user: null } | { assistant: null } | { system: null };
-
-export const Role_IDL = IDL.Variant({
-  user: IDL.Null,
-  assistant: IDL.Null,
-  system: IDL.Null,
-});
-
-// Define our preferred TypeScript interface using the enum
-export interface ChatMessage {
-  content: string;
-  role: Role;
-}
-
-// Define the IDL type constructor with the same name
-export const ChatMessage = IDL.Record({
-  content: IDL.Text,
-  role: Role_IDL,
-});
-
-// Define the IDL-compatible interface
-interface ChatMessageIdl {
-  content: string;
-  role: RoleIdl;
-}
-
-// Define our preferred TypeScript interface for requests
-export interface ChatRequest {
-  model: string;
-  messages: ChatMessage[];
-}
-
-// Define the IDL type constructor with the same name
-export const ChatRequest = IDL.Record({
-  model: IDL.Text,
-  messages: IDL.Vec(ChatMessage),
-});
-
-// Define the IDL-compatible interface
-interface ChatRequestIdl {
-  model: string;
-  messages: Array<ChatMessageIdl>;
-}
-
-// Conversion functions between our TypeScript types and IDL types (internal use only)
-function convertToIdlRole(role: Role): RoleIdl {
-  switch (role) {
-    case Role.System:
-      return { system: null };
-    case Role.User:
-      return { user: null };
-    case Role.Assistant:
-      return { assistant: null };
-    default:
-      return { user: null }; // Default to user if unknown
-  }
-}
-
-function convertFromIdlRole(roleIdl: RoleIdl): Role {
-  if ("system" in roleIdl) {
-    return Role.System;
-  } else if ("user" in roleIdl) {
-    return Role.User;
-  } else if ("assistant" in roleIdl) {
-    return Role.Assistant;
-  } else {
-    // Default to User if unknown
-    return Role.User;
-  }
-}
-
-function convertToIdlChatMessage(message: ChatMessage): ChatMessageIdl {
-  return {
-    content: message.content,
-    role: convertToIdlRole(message.role),
-  };
-}
-
-function convertFromIdlChatMessage(messageIdl: ChatMessageIdl): ChatMessage {
-  return {
-    content: messageIdl.content,
-    role: convertFromIdlRole(messageIdl.role),
-  };
-}
-
-function convertToIdlChatRequest(request: ChatRequest): ChatRequestIdl {
-  return {
-    model: request.model,
-    messages: request.messages.map(convertToIdlChatMessage),
-  };
-}
-
-function convertFromIdlChatRequest(requestIdl: ChatRequestIdl): ChatRequest {
-  return {
-    model: requestIdl.model,
-    messages: requestIdl.messages.map(convertFromIdlChatMessage),
-  };
-}
-
-// Utility function to create a ChatMessage with our Role enum
-export function createChatMessage(role: Role, content: string): ChatMessage {
-  return {
-    role: role,
-    content: content,
-  };
-}
-
-// Model enum equivalent
+// Model enum
 export enum Model {
   Llama3_1_8B = "llama3.1:8b",
 }
 
-// Helper function to handle the chat request and response
-async function chat_helper(
-  model: Model,
-  messages: (ChatMessage | ChatMessageIdl)[]
-): Promise<string> {
-  // Convert our nice TypeScript types to IDL-compatible types
-  const chatRequestIdl: ChatRequestIdl = {
-    model: model,
-    messages: messages.map((message) => {
-      // Check if the message is already in IDL format by checking if the role property is an object
-      if (message.role && typeof message.role === "object") {
-        return message as ChatMessageIdl;
-      } else {
-        // Otherwise, convert from ChatMessage to ChatMessageIdl
-        return convertToIdlChatMessage(message as ChatMessage);
+// ==================== Tool Types ====================
+
+export interface Parameter {
+  name: string;
+  type: "string" | "boolean" | "number";
+  description?: string;
+  required?: boolean;
+  enum?: string[];
+}
+
+export interface Tool {
+  name: string;
+  description?: string;
+  parameters?: Parameter[];
+}
+
+export interface ToolCallArgument {
+  name: string;
+  value: string;
+}
+
+export interface FunctionCall {
+  name: string;
+  arguments: ToolCallArgument[];
+}
+
+export interface ToolCall {
+  id: string;
+  function: FunctionCall;
+}
+
+export interface AssistantMessage {
+  content?: string;
+  tool_calls: ToolCall[];
+}
+
+export interface Response {
+  message: AssistantMessage;
+}
+
+// ==================== Chat Message Types ====================
+
+export type ChatMessage = 
+  | { role: 'user'; content: string }
+  | { role: 'system'; content: string }  
+  | { role: 'assistant'; content?: string; tool_calls?: ToolCall[] }
+  | { role: 'tool'; content: string; tool_call_id: string };
+
+// ==================== IDL Definitions ====================
+
+const ToolCallArgument_IDL = IDL.Record({
+  name: IDL.Text,
+  value: IDL.Text,
+});
+
+const FunctionCall_IDL = IDL.Record({
+  name: IDL.Text,
+  arguments: IDL.Vec(ToolCallArgument_IDL),
+});
+
+const ToolCall_IDL = IDL.Record({
+  id: IDL.Text,
+  function: FunctionCall_IDL,
+});
+
+const AssistantMessage_IDL = IDL.Record({
+  content: IDL.Opt(IDL.Text),
+  tool_calls: IDL.Vec(ToolCall_IDL),
+});
+
+const ChatMessage_IDL = IDL.Record({
+  role: IDL.Text,
+  content: IDL.Opt(IDL.Text),
+  tool_calls: IDL.Opt(IDL.Vec(ToolCall_IDL)),
+  tool_call_id: IDL.Opt(IDL.Text),
+});
+
+const Parameter_IDL = IDL.Record({
+  name: IDL.Text,
+  type: IDL.Text,
+  description: IDL.Opt(IDL.Text),
+  required: IDL.Opt(IDL.Bool),
+  enum: IDL.Opt(IDL.Vec(IDL.Text)),
+});
+
+const Tool_IDL = IDL.Record({
+  name: IDL.Text,
+  description: IDL.Opt(IDL.Text),
+  parameters: IDL.Opt(IDL.Vec(Parameter_IDL)),
+});
+
+const Request_IDL = IDL.Record({
+  model: IDL.Text,
+  messages: IDL.Vec(ChatMessage_IDL),
+  tools: IDL.Opt(IDL.Vec(Tool_IDL)),
+});
+
+const Response_IDL = IDL.Record({
+  message: AssistantMessage_IDL,
+});
+
+// ==================== Chat Builder Class ====================
+
+export class ChatBuilder {
+  private model: Model;
+  private messages: ChatMessage[] = [];
+  private tools: Tool[] = [];
+
+  constructor(model: Model) {
+    this.model = model;
+  }
+
+  withMessages(messages: ChatMessage[]): ChatBuilder {
+    this.messages = messages;
+    return this;
+  }
+
+  withTools(tools: Tool[]): ChatBuilder {
+    this.tools = tools;
+    return this;
+  }
+
+  async send(): Promise<Response> {
+    const request = {
+      model: this.model,
+      messages: this.messages,
+      tools: this.tools.length > 0 ? this.tools : undefined,
+    };
+
+    const response = await call<[typeof request], Response>(
+      LLM_CANISTER,
+      "v1_chat",
+      {
+        paramIdlTypes: [Request_IDL],
+        returnIdlType: Response_IDL,
+        args: [request],
       }
-    }),
-  };
+    );
 
-  const response = await call<[ChatRequestIdl], string>(
-    LLM_CANISTER,
-    "v0_chat",
-    {
-      paramIdlTypes: [ChatRequest],
-      returnIdlType: IDL.Text,
-      args: [chatRequestIdl],
-    }
-  );
-
-  return response;
+    return response;
+  }
 }
 
-// Sends a single message to a model
-export async function prompt(model: Model, promptStr: string): Promise<string> {
-  const message = createChatMessage(Role.User, promptStr);
-  return await chat(model, [message]);
+// ==================== Convenience Functions ====================
+
+export function prompt(model: Model, promptStr: string): Promise<string> {
+  return chat(model)
+    .withMessages([{ role: 'user', content: promptStr }])
+    .send()
+    .then(response => response.message.content || "");
 }
 
-// Sends a list of messages to a model
-export async function chat(
-  model: Model,
-  messages: ChatMessage[]
-): Promise<string> {
-  const messages_: (ChatMessage | ChatMessageIdl)[] = messages;
-  return await chat_helper(model, messages_);
+export function chat(model: Model): ChatBuilder {
+  return new ChatBuilder(model);
+}
+
+// ==================== Helper Functions for Tool Calls ====================
+
+export class FunctionCallHelper {
+  private functionCall: FunctionCall;
+
+  constructor(functionCall: FunctionCall) {
+    this.functionCall = functionCall;
+  }
+
+  get(argumentName: string): string | undefined {
+    const arg = this.functionCall.arguments.find(arg => arg.name === argumentName);
+    return arg?.value;
+  }
 }
