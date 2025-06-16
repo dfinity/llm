@@ -5,11 +5,6 @@ type assistant_message = record {
     function : record { name : text; arguments : vec tool_call_argument };
   };
 };
-type backend_config = variant {
-  groq : record { api_key : text };
-  worker;
-  ollama;
-};
 type chat_message_v0 = record {
   content : text;
   role : variant { user; assistant; system };

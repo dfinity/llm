@@ -41,7 +41,8 @@ The LLM canister supports two backend options for processing prompts:
 
 1. **Ollama (Local)**: A free, self-hosted solution that runs on your local machine. Perfect for testing and development without any costs.
 
-2. **Groq API**: A cloud-based solution that can handle larger models that might be too resource-intensive for local machines. Requires an API key (free for testing).
+2. **OpenRouter API**: A cloud-based solution that can handle larger models that might be too resource-intensive for local machines. Requires an API key.
+Note: This used to Groq for v0.2.1 and lower.
 
 You can select your preferred backend by initialising the llm dependency through `dfx deps init` (see below for init arguments).
 
@@ -67,10 +68,10 @@ Initialise the llm canister with `dfx deps init llm --argument '(opt variant { o
 This backend is also the default backend and thus will work without calling the initialisation if the `deps/init.json` has not been changed.
 
 
-#### Configure with Groq
-As an alternative you can use the [Groq API](https://console.groq.com/home). You will need to create an [API key](https://console.groq.com/keys) first (free for testing purposes).
+#### Configure with OpenRouter
+As an alternative you can use the [OpenRouter API](https://openrouter.ai/). You will need to create an [API key](https://openrouter.ai/settings/keys) first.
 
-Initialise the llm canister with `dfx deps init llm --argument '(opt variant { groq = record { api_key = "{YOUR_API_KEY}" } }, null)'`, replacing `YOUR_API_KEY` with your own. You can also inspect `deps/init.json` to see which backend will be used when launching the canister.
+Initialise the llm canister with `dfx deps init llm --argument '(opt variant { openrouter = record { api_key = "{YOUR_API_KEY}" } }, null)'`, replacing `YOUR_API_KEY` with your own. You can also inspect `deps/init.json` to see which backend will be used when launching the canister.
 
 ### Deployment
 
