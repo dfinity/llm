@@ -10,33 +10,18 @@ export enum Model {
 
 // ==================== Tool Types ====================
 
-export enum ParameterType {
-  String = "string",
-  Boolean = "boolean",
-  Number = "number",
-}
-
-export interface Property {
-  type: string;
+export interface Parameter {
   name: string;
+  type: "string" | "boolean" | "number";
   description?: string;
+  required?: boolean;
   enum?: string[];
 }
 
-export interface Parameters {
-  type: string;
-  properties?: Property[];
-  required?: string[];
-}
-
-export interface Function {
+export interface Tool {
   name: string;
   description?: string;
-  parameters?: Parameters;
-}
-
-export interface Tool {
-  function: Function;
+  parameters?: Parameter[];
 }
 
 export interface ToolCallArgument {
@@ -66,10 +51,10 @@ export interface Response {
 // ==================== Chat Message Types ====================
 
 export type ChatMessage = 
-  | { user: { content: string } }
-  | { system: { content: string } }  
-  | { assistant: AssistantMessage }
-  | { tool: { content: string; tool_call_id: string } };
+  | { role: 'user'; content: string }
+  | { role: 'system'; content: string }  
+  | { role: 'assistant'; content?: string; tool_calls?: ToolCall[] }
+  | { role: 'tool'; content: string; tool_call_id: string };
 
 // ==================== IDL Definitions ====================
 
@@ -93,37 +78,25 @@ const AssistantMessage_IDL = IDL.Record({
   tool_calls: IDL.Vec(ToolCall_IDL),
 });
 
-const ChatMessage_IDL = IDL.Variant({
-  user: IDL.Record({ content: IDL.Text }),
-  system: IDL.Record({ content: IDL.Text }),
-  assistant: AssistantMessage_IDL,
-  tool: IDL.Record({
-    content: IDL.Text,
-    tool_call_id: IDL.Text,
-  }),
+const ChatMessage_IDL = IDL.Record({
+  role: IDL.Text,
+  content: IDL.Opt(IDL.Text),
+  tool_calls: IDL.Opt(IDL.Vec(ToolCall_IDL)),
+  tool_call_id: IDL.Opt(IDL.Text),
 });
 
-const Property_IDL = IDL.Record({
-  type: IDL.Text,
+const Parameter_IDL = IDL.Record({
   name: IDL.Text,
+  type: IDL.Text,
   description: IDL.Opt(IDL.Text),
+  required: IDL.Opt(IDL.Bool),
   enum: IDL.Opt(IDL.Vec(IDL.Text)),
 });
 
-const Parameters_IDL = IDL.Record({
-  type: IDL.Text,
-  properties: IDL.Opt(IDL.Vec(Property_IDL)),
-  required: IDL.Opt(IDL.Vec(IDL.Text)),
-});
-
-const Function_IDL = IDL.Record({
+const Tool_IDL = IDL.Record({
   name: IDL.Text,
   description: IDL.Opt(IDL.Text),
-  parameters: IDL.Opt(Parameters_IDL),
-});
-
-const Tool_IDL = IDL.Record({
-  function: Function_IDL,
+  parameters: IDL.Opt(IDL.Vec(Parameter_IDL)),
 });
 
 const Request_IDL = IDL.Record({
@@ -136,92 +109,7 @@ const Response_IDL = IDL.Record({
   message: AssistantMessage_IDL,
 });
 
-// ==================== Builder Classes ====================
-
-export class ParameterBuilder {
-  private name: string;
-  private type: ParameterType;
-  private description?: string;
-  private required: boolean = false;
-  private enumValues?: string[];
-
-  constructor(name: string, type: ParameterType) {
-    this.name = name;
-    this.type = type;
-  }
-
-  withDescription(description: string): ParameterBuilder {
-    this.description = description;
-    return this;
-  }
-
-  isRequired(): ParameterBuilder {
-    this.required = true;
-    return this;
-  }
-
-  withEnumValues(values: string[]): ParameterBuilder {
-    this.enumValues = values;
-    return this;
-  }
-
-  toProperty(): Property {
-    return {
-      type: this.type,
-      name: this.name,
-      description: this.description,
-      enum: this.enumValues,
-    };
-  }
-
-  isRequiredProperty(): boolean {
-    return this.required;
-  }
-
-  getName(): string {
-    return this.name;
-  }
-}
-
-export class ToolBuilder {
-  private functionDef: Function;
-  private parameters: ParameterBuilder[] = [];
-
-  constructor(name: string) {
-    this.functionDef = {
-      name,
-    };
-  }
-
-  withDescription(description: string): ToolBuilder {
-    this.functionDef.description = description;
-    return this;
-  }
-
-  withParameter(parameter: ParameterBuilder): ToolBuilder {
-    this.parameters.push(parameter);
-    return this;
-  }
-
-  build(): Tool {
-    if (this.parameters.length > 0) {
-      const properties = this.parameters.map(p => p.toProperty());
-      const required = this.parameters
-        .filter(p => p.isRequiredProperty())
-        .map(p => p.getName());
-
-      this.functionDef.parameters = {
-        type: "object",
-        properties,
-        required: required.length > 0 ? required : undefined,
-      };
-    }
-
-    return {
-      function: this.functionDef,
-    };
-  }
-}
+// ==================== Chat Builder Class ====================
 
 export class ChatBuilder {
   private model: Model;
@@ -267,21 +155,13 @@ export class ChatBuilder {
 
 export function prompt(model: Model, promptStr: string): Promise<string> {
   return chat(model)
-    .withMessages([{ user: { content: promptStr } }])
+    .withMessages([{ role: 'user', content: promptStr }])
     .send()
     .then(response => response.message.content || "");
 }
 
 export function chat(model: Model): ChatBuilder {
   return new ChatBuilder(model);
-}
-
-export function tool(name: string): ToolBuilder {
-  return new ToolBuilder(name);
-}
-
-export function parameter(name: string, type: ParameterType): ParameterBuilder {
-  return new ParameterBuilder(name, type);
 }
 
 // ==================== Helper Functions for Tool Calls ====================
@@ -297,32 +177,4 @@ export class FunctionCallHelper {
     const arg = this.functionCall.arguments.find(arg => arg.name === argumentName);
     return arg?.value;
   }
-}
-
-// ==================== Message Creation Helpers ====================
-
-export function createUserMessage(content: string): ChatMessage {
-  return { user: { content } };
-}
-
-export function createSystemMessage(content: string): ChatMessage {
-  return { system: { content } };
-}
-
-export function createAssistantMessage(content?: string, toolCalls: ToolCall[] = []): ChatMessage {
-  return { 
-    assistant: { 
-      content, 
-      tool_calls: toolCalls 
-    } 
-  };
-}
-
-export function createToolMessage(content: string, toolCallId: string): ChatMessage {
-  return { 
-    tool: { 
-      content, 
-      tool_call_id: toolCallId 
-    } 
-  };
 }
