@@ -3,6 +3,9 @@ import Tool "./tool";
 
 module {
   public type ChatMessage = Chat.ChatMessage;
+  public type ToolCallArgument = Tool.ToolCallArgument;
+  public type ToolCall = Tool.ToolCall;
+  public type AssistantMessage = Chat.AssistantMessage;
 
   public func prompt(model : Chat.Model, promptStr : Text) : async Text {
     let response = await Chat.ChatBuilder(model).withMessages([
