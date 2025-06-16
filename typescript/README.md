@@ -126,21 +126,16 @@ export default class {
     // Define a tool that allows the LLM to get weather information for a location
     const tools: llm.Tool[] = [
       {
-        type: "function",
-        function: {
-          name: "get_weather",
-          description: "Get the current weather for a location",
-          parameters: {
-            type: "object",
-            properties: {
-              location: {
-                type: "string",
-                description: "The city and state, e.g. San Francisco, CA"
-              }
-            },
-            required: ["location"]
+        name: "get_weather",
+        description: "Get the current weather for a location",
+        parameters: [
+          {
+            name: "location",
+            type: "string",
+            description: "The city and state, e.g. San Francisco, CA",
+            required: true
           }
-        }
+        ]
       }
     ];
 
