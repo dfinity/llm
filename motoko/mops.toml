@@ -1,6 +1,6 @@
 [package]
 name = "llm"
-version = "2.0.1"
+version = "2.1.0"
 description = "Library for the LLM canister"
 repository = "https://github.com/dfinity/llm/motoko"
 keywords = [ "llm", "ai", "agent" ]

@@ -33,11 +33,15 @@ module {
     /// Supported LLM models
     public type Model = {
         #Llama3_1_8B;
+        #Qwen3_32B;
+        #Llama4Scout;
     };
 
     public func modelToText(model : Model) : Text {
         switch (model) {
             case (#Llama3_1_8B) { "llama3.1:8b" };
+            case (#Qwen3_32B) { "qwen3:32b" };
+            case (#Llama4Scout) { "llama4-scout" };
         };
     };
 

@@ -1,5 +1,13 @@
 A library for making requests to the LLM canister on the Internet Computer.
 
+## Supported Models
+
+The following LLM models are available:
+
+- `Model::Llama3_1_8B` - Llama 3.1 8B model
+- `Model::Qwen3_32B` - Qwen 3 32B model  
+- `Model::Llama4Scout` - Llama 4 Scout model
+
 ## Usage
 
 ### Basic Usage
