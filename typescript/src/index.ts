@@ -121,6 +121,8 @@ export function createChatMessage(role: Role, content: string): ChatMessage {
 // Model enum equivalent
 export enum Model {
   Llama3_1_8B = "llama3.1:8b",
+  Qwen3_32B = "qwen3:32b",
+  Llama4Scout = "llama4-scout",
 }
 
 // Helper function to handle the chat request and response

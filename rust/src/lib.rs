@@ -18,12 +18,16 @@ const LLM_CANISTER: &str = "w36hm-eqaaa-aaaal-qr76a-cai";
 #[derive(Debug)]
 pub enum Model {
     Llama3_1_8B,
+    Qwen3_32B,
+    Llama4Scout,
 }
 
 impl fmt::Display for Model {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let text = match self {
             Model::Llama3_1_8B => "llama3.1:8b",
+            Model::Qwen3_32B => "qwen3:32b",
+            Model::Llama4Scout => "llama4-scout",
         };
         write!(f, "{}", text)
     }
