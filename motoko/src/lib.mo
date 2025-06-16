@@ -6,6 +6,10 @@ module {
   public type ToolCallArgument = Tool.ToolCallArgument;
   public type ToolCall = Tool.ToolCall;
   public type AssistantMessage = Chat.AssistantMessage;
+  public type Response = Chat.Response;
+  public type Request = Chat.Request;
+  public type Model = Chat.Model;
+  
 
   public func prompt(model : Chat.Model, promptStr : Text) : async Text {
     let response = await Chat.ChatBuilder(model).withMessages([
