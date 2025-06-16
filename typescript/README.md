@@ -49,8 +49,36 @@ import { IDL, update } from "azle";
 import * as llm from "@dfinity/llm";
 
 export default class {
-  @update([IDL.Vec(llm.ChatMessage), IDL.Vec(llm.Tool)], llm.Response)
-  async chatWithTools(messages: llm.ChatMessage[], tools: llm.Tool[]): Promise<llm.Response> {
+  @update([IDL.Text], llm.Response)
+  async chatWithTools(userMessage: string): Promise<llm.Response> {
+    const messages: llm.ChatMessage[] = [
+      {
+        role: "user",
+        content: userMessage
+      }
+    ];
+
+    // Define a tool that allows the LLM to get weather information for a location
+    const tools: llm.Tool[] = [
+      {
+        type: "function",
+        function: {
+          name: "get_weather",
+          description: "Get the current weather for a location",
+          parameters: {
+            type: "object",
+            properties: {
+              location: {
+                type: "string",
+                description: "The city and state, e.g. San Francisco, CA"
+              }
+            },
+            required: ["location"]
+          }
+        }
+      }
+    ];
+
     return await llm.chat(llm.Model.Llama3_1_8B)
       .withMessages(messages)
       .withTools(tools)
