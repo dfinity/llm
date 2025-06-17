@@ -1,5 +1,4 @@
 import Tool "./tool";
-import Array "mo:base/Array";
 
 module {
     private let llmCanister = actor ("w36hm-eqaaa-aaaal-qr76a-cai") : actor {
