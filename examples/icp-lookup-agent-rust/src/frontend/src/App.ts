@@ -19,9 +19,10 @@ class App {
 
     this.chat = [
       {
-        role: { assistant: null },
-        content:
-          "I'm an agent specializing in looking up ICP balances. Ask me for an ICP balance to lookup.",
+        assistant: {
+          content: ["I'm an agent specializing in looking up ICP balances. Ask me for an ICP balance to lookup."],
+          tool_calls: [],
+        },
       },
     ];
 
@@ -41,10 +42,16 @@ class App {
 
   // Appends a message to the chat box.
   appendMessage(message: chat_message) {
-    let side = "user" in message.role ? "right" : "left";
-    let img = "user" in message.role ? PERSON_IMG : BOT_IMG;
-    let name = "user" in message.role ? "User" : "Assistant";
-    let text = message.content;
+    let side = "user" in message ? "right" : "left";
+    let img = "user" in message ? PERSON_IMG : BOT_IMG;
+    let name = "user" in message ? "User" : "Assistant";
+    let text = "user" in message 
+      ? message.user.content 
+      : "assistant" in message 
+        ? message.assistant.content[0] ?? ""
+        : "system" in message
+          ? message.system.content
+          : message.tool.content;
 
     const msgHTML = `
 <div class="msg ${side}-msg">
@@ -81,8 +88,10 @@ class App {
 
       // Add the agent's response.
       this.chat.push({
-        role: { assistant: null },
-        content: response,
+              assistant: {
+        content: [response],
+        tool_calls: [],
+      }
       });
     } catch (e) {
       console.log(e);
@@ -117,15 +126,18 @@ class App {
     if (!msgText) return;
 
     this.chat.push({
-      role: { user: null },
-      content: msgText,
+      user: {
+        content: msgText,
+      }
     });
     msgerInput.value = "";
 
     // Add user message to chat and show "thinking..." while waiting for response.
     this.chat.push({
-      role: { assistant: null },
-      content: "Thinking...",
+      assistant: {
+        content: ["Thinking..."],
+        tool_calls: [],
+      }
     });
 
     // Disable the send button.

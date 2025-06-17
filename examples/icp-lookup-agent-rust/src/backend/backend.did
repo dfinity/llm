@@ -1,6 +1,20 @@
-type chat_message = record {
-  role: variant { user; system; assistant };
-  content: text;
+type chat_message = variant {
+  tool : record { content : text; tool_call_id : text };
+  user : record { content : text };
+  assistant : record {
+    content : opt text;
+    tool_calls : vec record {
+      id : text;
+      function : record {
+        name : text;
+        arguments : vec record {
+          name : text;
+          value : text;
+        };
+      }
+    };
+  };
+  system : record { content : text };
 };
 
 service: {

@@ -1,4 +1,4 @@
-use ic_llm::{ChatMessage, Model, Role};
+use ic_llm::{ChatMessage, Model};
 use ic_ledger_types::{AccountIdentifier, AccountBalanceArgs, MAINNET_LEDGER_CANISTER_ID, account_balance};
 
 const SYSTEM_PROMPT: &str = "You are an assistant that specializes in looking up the balance of ICP accounts.
@@ -60,8 +60,7 @@ async fn lookup_account(account: &str) -> String {
 #[ic_cdk::update]
 async fn chat(messages: Vec<ChatMessage>) -> String {
     // Prepend the system prompt to the messages.
-    let mut all_messages = vec![ChatMessage {
-        role: Role::System,
+    let mut all_messages = vec![ChatMessage::System {
         content: SYSTEM_PROMPT.to_string(),
     }];
     all_messages.extend(messages);
@@ -69,18 +68,23 @@ async fn chat(messages: Vec<ChatMessage>) -> String {
 
     let answer = ic_llm::chat(
         Model::Llama3_1_8B,
-        messages,
     )
+    .with_messages(messages)
+    .send()
     .await;
 
-    if answer.starts_with("LOOKUP(") {
-        // Extract the account from LOOKUP(account)
-        let account = answer
-            .trim_start_matches("LOOKUP(")
-            .trim_end_matches(")");
-        
-        lookup_account(&account).await
+    if let Some(content) = answer.message.content {
+        if content.starts_with("LOOKUP(") {
+            // Extract the account from LOOKUP(account)
+            let account = content
+                .trim_start_matches("LOOKUP(")
+                .trim_end_matches(")");
+            
+            lookup_account(&account).await
+        } else {
+            content
+        }
     } else {
-        answer
+        "No response from the model".to_string()
     }
 }
