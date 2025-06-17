@@ -1,44 +1,16 @@
-use ic_llm::{ChatMessage, Model};
+use ic_llm::{ChatMessage, Model, tool, ParameterType};
 use ic_ledger_types::{AccountIdentifier, AccountBalanceArgs, MAINNET_LEDGER_CANISTER_ID, account_balance};
 
-const SYSTEM_PROMPT: &str = "You are an assistant that specializes in looking up the balance of ICP accounts.
+const SYSTEM_PROMPT: &str = r#"You are an assistant that exclusively performs ICP balance lookups.
+Use the 'lookup_icp_balance' tool when asked for an account balance and report the balance back to the user.
+If the user asks about anything else, politely inform them that you can only look up ICP balances and offer to perform a lookup."#;
 
-When asked to respond with a certain string, respond with the exact string and don't add anything more.
-
-Follow these steps rigorously:
-
----
-
-### 1. Validation Phase
-- Check if the user input contains a 64-character hexadecimal string (0-9, a-f, A-F).
-  - If a valid 64-character hexadecimal string is found, proceed to the **Execution Phase**.
-  - If no valid 64-character hexadecimal string is found, proceed to the **Request Phase**.
-- When asked about what you do or your function, say \"I am an agent specializing in looking up ICP balances. You can give me an ICP account and I can look up its balance.\"
-
----
-
-### 2. Request Phase
-- If the user asks about a balance without providing a valid account, or asks about their balance, respond:
-  \"Please provide an ICP account (64-character hexadecimal string).\"
-- If the user asks for anything else, including to convert something, respond:
-  \"I can only help with ICP account balances. Please provide an ICP account for me to look up its balance.\"
-
----
-
-### 3. Execution Phase
-- For accounts: Return EXACTLY \"LOOKUP({ACCOUNT})\"
-  - Replace `{ACCOUNT}` with the 64-character hexadecimal string provided by the user.
-- Never add explanations, formatting, or extra text in this phase.
-
----
-
-### Notes:
-- A valid 64-character hexadecimal string consists of characters 0-9, a-f, or A-F, and must be exactly 64 characters long.
-- If multiple 64-character hexadecimal strings are provided, use the first one found.";
+const MODEL: Model = Model::Qwen3_32B;
 
 /// Lookup the balance of an ICP account.
 async fn lookup_account(account: &str) -> String {
     if account.len() != 64 {
+        ic_cdk::println!("Account must be 64 characters long but got {} for input \"{}\"", account.len(), account);
         return "Account must be 64 characters long".to_string();
     }
 
@@ -64,27 +36,64 @@ async fn chat(messages: Vec<ChatMessage>) -> String {
         content: SYSTEM_PROMPT.to_string(),
     }];
     all_messages.extend(messages);
-    let messages = all_messages;
 
-    let answer = ic_llm::chat(
-        Model::Llama3_1_8B,
-    )
-    .with_messages(messages)
-    .send()
-    .await;
+    let tools = vec![
+        tool("lookup_icp_balance")
+            .with_description("Lookup the balance of an ICP account.")
+            .with_parameter(
+                ic_llm::parameter("account", ParameterType::String)
+                    .with_description("The ICP account (64-character hex string) to look up.")
+                    .is_required()
+            )
+            .build()
+    ];
 
-    if let Some(content) = answer.message.content {
-        if content.starts_with("LOOKUP(") {
-            // Extract the account from LOOKUP(account)
-            let account = content
-                .trim_start_matches("LOOKUP(")
-                .trim_end_matches(")");
-            
-            lookup_account(&account).await
-        } else {
-            content
+    ic_cdk::println!("all tools: {:?}", tools);
+
+    let response = ic_llm::chat(MODEL)
+        .with_messages(all_messages.clone())
+        .with_tools(tools)
+        .send()
+        .await;
+
+    // Check if LLM wants to use tools
+    if !response.message.tool_calls.is_empty() {
+        // Add assistant message with tool calls
+        all_messages.push(ChatMessage::Assistant(response.message.clone()));
+
+        // Process each tool call
+        for tool_call in &response.message.tool_calls {
+            ic_cdk::println!("tool_call: {:?}", tool_call);
+            let tool_result = match tool_call.function.name.as_str() {
+                "lookup_icp_balance" => {
+                    let account = tool_call.function.get("account").unwrap_or_default();
+                    ic_cdk::println!("account: {:?}", account);
+                    lookup_account(&account).await
+                }
+                _ => format!("Unknown tool: {}", tool_call.function.name)
+            };
+
+            ic_cdk::println!("tool_result: {:?}", tool_result);
+
+            // Add tool result to conversation
+            all_messages.push(ChatMessage::Tool {
+                content: tool_result,
+                tool_call_id: tool_call.id.clone(),
+            });
         }
+
+        // Get final response from LLM with tool results
+        let final_response = ic_llm::chat(MODEL)
+            .with_messages(all_messages)
+            .send()
+            .await;
+
+        ic_cdk::println!("final_response: {:?}", final_response);
+
+        final_response.message.content.unwrap_or_default()
     } else {
-        "No response from the model".to_string()
+        // No tool calls needed, return direct response
+        ic_cdk::println!("response without tool calls: {:?}", response);
+        response.message.content.unwrap_or_default()
     }
 }
