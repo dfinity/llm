@@ -62,9 +62,14 @@ Follow these steps rigorously:
 
   public func chat(messages : [LLM.ChatMessage]) : async Text {
     // Prepend the system prompt to the messages.
-    let allMessages = Array.append([{ role = #system_; content = SYSTEM_PROMPT }], messages);
+    let systemMsg : LLM.ChatMessage = #system_({ content = SYSTEM_PROMPT });
+    let allMessages = Array.append([systemMsg], messages);
 
-    let answer = await LLM.chat(#Llama3_1_8B, allMessages);
+    let response = await LLM.chat(#Llama3_1_8B).withMessages(allMessages).send();
+    let answer = switch (response.message.content) {
+      case (?text) text;
+      case null "";
+    };
     if (Text.startsWith(answer, #text "LOOKUP(")) {
       // Extract the account from LOOKUP(account)
       let account = Text.trimStart(Text.trimEnd(answer, #char ')'), #text "LOOKUP(");

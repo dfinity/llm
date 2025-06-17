@@ -13,4 +13,4 @@ crate-type = ["cdylib"]
 candid = "0.10"
 ic-cdk = "0.16"
 ic-ledger-types = "0.14.0"
-ic-llm = "0.4.0"
+ic-llm = "1.1.0"
