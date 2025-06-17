@@ -13,13 +13,16 @@ The following LLM models are available:
 
 ## Local Development Setup
 
+> **Note**: When developing locally, the architecture differs slightly from mainnet. Instead of using AI workers, the LLM canister connects directly to your local Ollama instance. This makes local development faster and easier, while still maintaining the same interface and behavior as the mainnet deployment. For more information about how the LLM canister works, see the [How Does it Work?](../README.md#how-does-it-work).
+
+
 Before using this library in local development, you need to set up the LLM canister dependency:
 
 ### Prerequisites
 - [DFX](https://internetcomputer.org/docs/building-apps/getting-started/install) installed
 - [Ollama](https://ollama.com/) installed and running locally
 
-### Setup Steps
+### Setup Steps with Ollama
 
 1. **Start Ollama** (required for local development):
 ```bash
