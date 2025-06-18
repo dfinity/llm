@@ -104,7 +104,7 @@ export default class {
       .withMessages(messages)
       .send();
     
-    return response.message.content || "";
+    return response.message.content[0] || "";
   }
 }
 ```
@@ -116,12 +116,13 @@ import { IDL, update } from "azle";
 import * as llm from "@dfinity/llm";
 
 export default class {
-  @update([IDL.Text], llm.Response)
-  async chatWithTools(userMessage: string): Promise<llm.Response> {
+  @update([IDL.Text], llm.ChatResponse)
+  async chatWithTools(userMessage: string): Promise<llm.ChatResponse> {
     const messages: llm.ChatMessage[] = [
       {
-        role: "user",
-        content: userMessage
+        user: {
+          content: userMessage
+        }
       }
     ];
 
