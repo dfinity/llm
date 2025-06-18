@@ -48,13 +48,11 @@ async fn chat(messages: Vec<ChatMessage>) -> String {
             .build()
     ];
 
-    ic_cdk::println!("all tools: {:?}", tools);
-
-    let response = ic_llm::chat(MODEL)
+    let chat = ic_llm::chat(MODEL)
         .with_messages(all_messages.clone())
-        .with_tools(tools)
-        .send()
-        .await;
+        .with_tools(tools);
+
+    let response = chat.send().await;
 
     // Check if LLM wants to use tools
     if !response.message.tool_calls.is_empty() {
@@ -66,8 +64,7 @@ async fn chat(messages: Vec<ChatMessage>) -> String {
             ic_cdk::println!("tool_call: {:?}", tool_call);
             let tool_result = match tool_call.function.name.as_str() {
                 "lookup_icp_balance" => {
-                    let account = tool_call.function.get("account").unwrap_or_default();
-                    ic_cdk::println!("account: {:?}", account);
+                    let account = tool_call.function.get("account").expect("account is required");
                     lookup_account(&account).await
                 }
                 _ => format!("Unknown tool: {}", tool_call.function.name)

@@ -11,8 +11,8 @@
     },
     "w36hm-eqaaa-aaaal-qr76a-cai": {
       "name": "llm",
-      "wasm_hash": "31c5d981ac88f2861ea2e75108f5c998035814f2648068e079901cbf1916deac",
-      "wasm_hash_download": "31c5d981ac88f2861ea2e75108f5c998035814f2648068e079901cbf1916deac",
+      "wasm_hash": "b4ac8ec1cbd1505e217dd52decb9f52c60d3c1a818c31876508490e59448e1f7",
+      "wasm_hash_download": "9fc6a172b13289428c6975895382c3c923fb641bcd8e8a5168469298c3cff310",
       "init_guide": "",
       "init_arg": null,
       "candid_args": "(opt backend_config, opt config)",
