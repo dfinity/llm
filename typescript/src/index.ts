@@ -41,22 +41,9 @@ export interface ToolCall {
   function: FunctionCall;
 }
 
-export interface AssistantMessage {
-  content?: string;
-  tool_calls: ToolCall[];
-}
-
-export interface Response {
+export interface ChatResponse {
   message: AssistantMessage;
 }
-
-// ==================== Chat Message Types ====================
-
-export type ChatMessage = 
-  | { role: 'user'; content: string }
-  | { role: 'system'; content: string }  
-  | { role: 'assistant'; content?: string; tool_calls?: ToolCall[] }
-  | { role: 'tool'; content: string; tool_call_id: string };
 
 // ==================== IDL Definitions ====================
 
@@ -80,11 +67,44 @@ const AssistantMessage_IDL = IDL.Record({
   tool_calls: IDL.Vec(ToolCall_IDL),
 });
 
-const ChatMessage_IDL = IDL.Record({
-  role: IDL.Text,
-  content: IDL.Opt(IDL.Text),
-  tool_calls: IDL.Opt(IDL.Vec(ToolCall_IDL)),
-  tool_call_id: IDL.Opt(IDL.Text),
+interface AssistantMessage {
+  content: [string] | [];
+  tool_calls: ToolCall[];
+}
+
+export type ChatMessage =
+  | {
+      user: {
+        content: string;
+      };
+    }
+  | {
+      assistant: AssistantMessage;
+    }
+  | {
+      system: {
+        content: string;
+      };
+    }
+  | {
+      tool: {
+        content: string;
+        tool_call_id: string;
+      };
+    };
+
+const ChatMessage_IDL = IDL.Variant({
+  user: IDL.Record({
+    content: IDL.Text,
+  }),
+  assistant: AssistantMessage_IDL,
+  system: IDL.Record({
+    content: IDL.Text,
+  }),
+  tool: IDL.Record({
+    content: IDL.Text,
+    tool_call_id: IDL.Text,
+  }),
 });
 
 const Parameter_IDL = IDL.Record({
@@ -132,14 +152,14 @@ export class ChatBuilder {
     return this;
   }
 
-  async send(): Promise<Response> {
+  async send(): Promise<ChatResponse> {
     const request = {
       model: this.model,
       messages: this.messages,
-      tools: this.tools.length > 0 ? this.tools : undefined,
+      tools: this.tools,
     };
 
-    const response = await call<[typeof request], Response>(
+    const response = await call<[typeof request], ChatResponse>(
       LLM_CANISTER,
       "v1_chat",
       {
@@ -157,9 +177,9 @@ export class ChatBuilder {
 
 export function prompt(model: Model, promptStr: string): Promise<string> {
   return chat(model)
-    .withMessages([{ role: 'user', content: promptStr }])
+    .withMessages([{ user: { content: promptStr } }])
     .send()
-    .then(response => response.message.content || "");
+    .then((response) => response.message.content?.[0] || "");
 }
 
 export function chat(model: Model): ChatBuilder {
@@ -176,7 +196,9 @@ export class FunctionCallHelper {
   }
 
   get(argumentName: string): string | undefined {
-    const arg = this.functionCall.arguments.find(arg => arg.name === argumentName);
+    const arg = this.functionCall.arguments.find(
+      (arg) => arg.name === argumentName
+    );
     return arg?.value;
   }
 }
