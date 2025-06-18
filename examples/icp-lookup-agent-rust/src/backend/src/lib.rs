@@ -10,7 +10,6 @@ const MODEL: Model = Model::Qwen3_32B;
 /// Lookup the balance of an ICP account.
 async fn lookup_account(account: &str) -> String {
     if account.len() != 64 {
-        ic_cdk::println!("Account must be 64 characters long but got {} for input \"{}\"", account.len(), account);
         return "Account must be 64 characters long".to_string();
     }
 
@@ -61,7 +60,6 @@ async fn chat(messages: Vec<ChatMessage>) -> String {
 
         // Process each tool call
         for tool_call in &response.message.tool_calls {
-            ic_cdk::println!("tool_call: {:?}", tool_call);
             let tool_result = match tool_call.function.name.as_str() {
                 "lookup_icp_balance" => {
                     let account = tool_call.function.get("account").expect("account is required");
@@ -69,8 +67,6 @@ async fn chat(messages: Vec<ChatMessage>) -> String {
                 }
                 _ => format!("Unknown tool: {}", tool_call.function.name)
             };
-
-            ic_cdk::println!("tool_result: {:?}", tool_result);
 
             // Add tool result to conversation
             all_messages.push(ChatMessage::Tool {
@@ -85,12 +81,9 @@ async fn chat(messages: Vec<ChatMessage>) -> String {
             .send()
             .await;
 
-        ic_cdk::println!("final_response: {:?}", final_response);
-
         final_response.message.content.unwrap_or_default()
     } else {
         // No tool calls needed, return direct response
-        ic_cdk::println!("response without tool calls: {:?}", response);
         response.message.content.unwrap_or_default()
     }
 }
