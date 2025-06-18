@@ -6,12 +6,22 @@ export interface _SERVICE {
   'chat' : ActorMethod<
     [
       Array<
-        {
-          'content' : string,
-          'role' : { 'user' : null } |
-            { 'assistant' : null } |
-            { 'system' : null },
-        }
+        { 'user' : { 'content' : string } } |
+          {
+            'assistant' : {
+              'content' : [] | [string],
+              'tool_calls' : Array<
+                {
+                  'id' : string,
+                  'function' : {
+                    'name' : string,
+                    'arguments' : Array<{ 'value' : string, 'name' : string }>,
+                  },
+                }
+              >,
+            }
+          } |
+          { 'system' : { 'content' : string } }
       >,
     ],
     string

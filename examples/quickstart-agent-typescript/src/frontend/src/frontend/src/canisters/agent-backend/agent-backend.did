@@ -1,4 +1,4 @@
 service: () -> {
-    chat: (vec record {content:text; role:variant {user; assistant; system}}) -> (text);
+    chat: (vec variant {user:record {content:text}; assistant:record {content:opt text; tool_calls:vec record {id:text; function:record {name:text; arguments:vec record {value:text; name:text}}}}; system:record {content:text}}) -> (text);
     prompt: (text) -> (text);
 }
