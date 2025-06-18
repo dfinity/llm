@@ -31,20 +31,21 @@ type config = record {
   workers_whitelist : variant { all; some : vec principal };
   api_disabled : bool;
 };
-type parameter = record {
+type parameters = record {
   "type" : text;
   properties : opt vec property;
   required : opt vec text;
 };
 type property = record {
   enum : opt vec text;
+  name : text;
   "type" : text;
   description : opt text;
 };
 type tool = variant {
   function : record {
     name : text;
-    parameters : opt vec parameter;
+    parameters : opt parameters;
     description : opt text;
   };
 };
