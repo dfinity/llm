@@ -113,6 +113,8 @@ actor {
 
 ### Advanced Usage with Tools
 
+For a complete example of using tools with the LLM library, see the [ICP Lookup Agent example](examples/icp-lookup-agent-motoko).
+
 #### Understanding Tools
 
 **Tools** are custom functions that you define and make available to the LLM. They allow the AI to perform actions beyond just generating text responses. When you provide tools to the LLM, it can decide when and how to use them based on the user's request.
