@@ -1,6 +1,5 @@
 # LLMs on the IC
-[![Tests](https://github.com/dfinity/llm/actions/workflows/tests.yml/badge.svg)](https://github.com/dfinity/llm/actions/workflows/tests.yml)
-
+[![Tests](https://github.com/dfinity/llm/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/dfinity/llm/actions/workflows/tests.yml)
 <div>
   <p>
     <a href="https://forum.dfinity.org"><img alt="Chat on the Forum" src="https://img.shields.io/badge/help-post%20on%20forum.dfinity.org-yellow"></a>
