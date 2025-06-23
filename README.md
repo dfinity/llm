@@ -1,5 +1,5 @@
 # LLMs on the IC
-
+[![Tests](https://github.com/dfinity/llm/actions/workflows/tests.yml/badge.svg)](https://github.com/dfinity/llm/actions/workflows/tests.yml)
 
 <div>
   <p>
