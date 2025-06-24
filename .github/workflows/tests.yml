@@ -49,7 +49,7 @@ jobs:
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: 1.84.1
 
       - name: Cache cargo dependencies
         uses: actions/cache@v4
@@ -79,7 +79,7 @@ jobs:
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: 1.84.1
           components: clippy, rustfmt
 
       - name: Restore cargo cache
