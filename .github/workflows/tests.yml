@@ -50,7 +50,6 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          override: true
 
       - name: Cache cargo dependencies
         uses: actions/cache@v4
@@ -82,10 +81,9 @@ jobs:
         with:
           toolchain: stable
           components: clippy, rustfmt
-          override: true
 
-      - name: Cache cargo dependencies
-        uses: actions/cache@v4
+      - name: Restore cargo cache
+        uses: actions/cache/restore@v4
         with:
           path: |
             ~/.cargo/bin/
