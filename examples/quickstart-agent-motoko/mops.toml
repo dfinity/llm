@@ -1,2 +1,8 @@
 [dependencies]
-llm = "2.1.0"
+llm = "../../motoko"
+# Transitive dep of the local `llm` path-dep; mops doesn't auto-resolve these
+# for path-deps, so it's declared explicitly here.
+core = "2.5.0"
+
+[toolchain]
+moc = "1.8.2"

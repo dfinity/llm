@@ -7,21 +7,17 @@
 .DS_Store
 **/.DS_Store
 
-# dfx temporary files
-.dfx/
+# icp-cli ephemeral state. `.icp/data/` is tracked (it stores mainnet canister
+# IDs in `.icp/data/mappings/ic.ids.json`).
+.icp/cache/
 
-# generated files
-**/declarations/
-
-# rust
-target/
+# generated bindings (output of @icp-sdk/bindgen)
+src/frontend/src/bindings/
 
 # frontend code
 node_modules/
 dist/
 .svelte-kit/
 
-# environment variables
-.env
-
-.mops
+# motoko package manager
+.mops/
