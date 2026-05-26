@@ -1,103 +1,95 @@
 # Quickstart AI Agent (Rust)
 
-This is a simple agent that simply relays whatever messages the user gives to the underlying models without any modification.
-It's meant to serve as a boilerplate project for those who want to get started building agents on the IC.
+A minimal agent that relays whatever messages the user gives to the underlying
+model without modification. Use it as a starting point for your own agents on
+the IC.
 
 ![Screenshot of the quickstart agent](../../screenshot.png)
 
+## Prerequisites
+
+- [mise](https://mise.jdx.dev/) to install Rust, Node, and pnpm at the
+  versions pinned in the repo's `mise.toml` (or install them yourself).
+- Run `pnpm install` at the repo root once — that brings in
+  [`icp-cli`](https://github.com/dfinity/icp-cli) and `ic-wasm` as project
+  devDependencies, exposed on PATH via mise's `_.path` config.
+- [Ollama](https://ollama.com/) (only needed for local development).
+
 ## Quickstart with Ollama
-Prerequisites
-- [DFX](https://internetcomputer.org/docs/building-apps/getting-started/install) installed
-- [Ollama](https://ollama.com/) installed
-- [PNPM](https://pnpm.io/) installed
 
 ```bash
-# start ollama server
+# Start Ollama (one window).
 ollama serve
 
-# Download the required model (one-time setup):
+# Pull the model (one-time).
 ollama run llama3.1:8b
 
-# Start the local Internet Computer:
-dfx start --clean
-
-# Deploy the canisters:
-dfx deploy
-dfx deps deploy
+# Start the local replica and deploy everything (separate window).
+icp network start -d
+icp deploy
 ```
 
-Finally, access the agent at:
-```
-http://{FRONTEND_CANISTER_ID}.localhost:8080
-```
+The frontend URL is printed at the end of `icp deploy`. Open it in a browser
+(use the `*.localhost:8080` form to avoid CORS issues).
 
-## Deployment
+## LLM backend selection
 
-### LLM Backend Configuration
-The LLM canister supports two backend options for processing prompts:
+The on-chain `llm` canister has two backends:
 
-1. **Ollama (Local)**: A free, self-hosted solution that runs on your local machine. Perfect for testing and development without any costs.
+1. **Ollama** (local, free) — the default. Suitable for development.
+2. **OpenRouter** (cloud, paid) — needed for larger models. Requires an
+   [API key](https://openrouter.ai/settings/keys).
 
-2. **OpenRouter API**: A cloud-based solution that can handle larger models that might be too resource-intensive for local machines. Requires an API key.
-Note: This used to Groq for v0.2.1 and lower.
+The choice is encoded in `icp.yaml`'s `init_args` for the `llm` canister. To
+switch from the default Ollama setup to OpenRouter, edit `icp.yaml`:
 
-You can select your preferred backend by initialising the llm dependency through `dfx deps init` (see below for init arguments).
-
-
-#### Configure with Ollama
-To be able to test the agent locally, you'll need a server for processing the agent's prompts. For that, we'll use `ollama`, which is a tool that can download and serve LLMs.
-See the documentation on the [Ollama website](https://ollama.com/) to install it. Once it's installed, run:
-
-```
-ollama serve
-# Expected to start listening on port 11434
+```yaml
+canisters:
+  - name: llm
+    build:
+      steps:
+        - type: pre-built
+          url: https://github.com/dfinity/llm/releases/download/v0.3.1/llm-canister.wasm
+          sha256: 9fc6a172b13289428c6975895382c3c923fb641bcd8e8a5168469298c3cff310
+    init_args: '(opt variant { openrouter = record { api_key = "YOUR_API_KEY" } }, null)'
 ```
 
-The above command will start the Ollama server, so that it can process requests by the agent. Additionally, and in a separate window, run the following command to download the LLM that will be used by the agent:
-
-```
-ollama run llama3.1:8b
-```
-
-The above command will download an 8B parameter model, which is around 4GiB. Once the command executes and the model is loaded, you can terminate it. You won't need to do this step again.
-
-Initialise the llm canister with `dfx deps init llm --argument '(opt variant { ollama }, null)'`. You can also inspect `deps/init.json` to see which backend will be used when launching the canister.
-This backend is also the default backend and thus will work without calling the initialisation if the `deps/init.json` has not been changed.
-
-
-#### Configure with OpenRouter
-As an alternative you can use the [OpenRouter API](https://openrouter.ai/). You will need to create an [API key](https://openrouter.ai/settings/keys) first.
-
-Initialise the llm canister with `dfx deps init llm --argument '(opt variant { openrouter = record { api_key = "{YOUR_API_KEY}" } }, null)'`, replacing `YOUR_API_KEY` with your own. You can also inspect `deps/init.json` to see which backend will be used when launching the canister.
-
-### Deployment
-
-Once your backend is set and initialized, you can start dfx and deploy the canisters.
-
-First, install `pnpm` and run `pnpm install` in the `src/frontend` directory.
-
-Then, in one terminal window, run:
+Then reinstall the `llm` canister so the new init args take effect:
 
 ```bash
-dfx start --clean
+icp deploy llm --mode reinstall
 ```
 
-Then pull the dependency and deploy the canisters in another window:
+## How it works locally
+
+`icp-cli` injects `PUBLIC_CANISTER_ID:llm` into `agent-backend` at deploy
+time, so the `ic-llm` SDK picks up the local replica's `llm` canister
+principal automatically. On mainnet that env var isn't set and the SDK falls
+back to the well-known principal `w36hm-eqaaa-aaaal-qr76a-cai`. No code
+changes needed between environments.
+
+## Deploying to mainnet
+
+The committed `.icp/data/mappings/ic.ids.json` pins the existing mainnet
+canister IDs (`vbixh-…` for `agent-backend`, `vgjrt-…` for `agent-frontend`).
+Use the `ic` environment:
 
 ```bash
-dfx deps pull
-dfx deploy
-dfx deps deploy  # deploys the llm canister
+icp deploy -e ic
 ```
 
-Once the deployment completes, you'll see the URL for the `agent-frontend` that looks like this:
+The `llm` canister is excluded from the `ic` environment in `icp.yaml` —
+mainnet already runs the canonical LLM canister at `w36hm-…` and the SDK
+addresses it directly.
 
-```
-http://0.0.0.0:8080/?canisterId={FRONTEND_CANISTER_ID}
+## Frontend dev server
+
+```bash
+cd src/frontend && pnpm install
+pnpm start
 ```
 
-Due to CORS policies on the browser, you should instead access the agent using the following URL:
-
-```
-http://{FRONTEND_CANISTER_ID}.localhost:8080
-```
+The dev server in `vite.config.js` mimics the asset canister by reading
+`icp network status` + `icp canister status agent-backend` and setting an
+`ic_env` cookie with the resolved IDs. The backend must be deployed
+(`icp deploy agent-backend`) before `pnpm start` is run.

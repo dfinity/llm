@@ -1,6 +1,6 @@
 [package]
 name = "ic-llm"
-version = "1.1.0"
+version = "1.2.0"
 edition = "2021"
 description = "A library for making requests to the LLM canister on the Internet Computer"
 homepage = "https://docs.rs/ic-llm"
@@ -12,5 +12,5 @@ readme = "README.md"
 
 [dependencies]
 candid = "0.10.13"
-ic-cdk = "0.17.1"
+ic-cdk = "0.20.1"
 serde = "1.0.217"
