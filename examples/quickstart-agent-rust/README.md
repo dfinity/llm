@@ -13,7 +13,11 @@ the IC.
 - Run `pnpm install` at the repo root once — that brings in
   [`icp-cli`](https://github.com/dfinity/icp-cli) and `ic-wasm` as project
   devDependencies, exposed on PATH via mise's `_.path` config.
-- [Ollama](https://ollama.com/) (only needed for local development).
+- One of the two LLM backends below: by default the local `llm` canister
+  uses [Ollama](https://ollama.com/) (free, runs on your machine). If you'd
+  rather use [OpenRouter](https://openrouter.ai/) (a paid cloud service that
+  can host larger models), see [LLM backend selection](#llm-backend-selection)
+  for how to switch.
 
 ## Quickstart with Ollama
 
