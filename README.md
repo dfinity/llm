@@ -23,11 +23,6 @@ The following libraries can be used to build AI agents on the Internet Computer 
 - [Explanation & Examples](motoko/README.md) - Setup, usage examples, and tool documentation
 - [Package Documentation](https://mops.one/llm) - Package registry and info
 
-### TypeScript Library (`@dfinity/llm`)
-
-- [Explanation & Examples](typescript/README.md) - Setup, usage examples, and tool documentation
-- [NPM Package](https://www.npmjs.com/package/@dfinity/llm) - Package installation and info
-
 ## Example Agents
 
 ### Quickstart Agent
@@ -35,10 +30,9 @@ The following libraries can be used to build AI agents on the Internet Computer 
 This is a simple agent that simply relays whatever messages the user gives to the underlying models without any modification.
 It's meant to serve as a boilerplate project for those who want to get started building agents on the IC.
 
-Rust, Motoko, and TypeScript implementations are provided in the `examples` folder.
+Rust and Motoko implementations are provided in the `examples` folder.
 - [Rust Quickstart Agent](examples/quickstart-agent-rust/README.md)
 - [Motoko Quickstart Agent](examples/quickstart-agent-motoko/README.md)
-- [TypeScript Quickstart Agent](examples/quickstart-agent-typescript/README.md)
 
 
 Additionally, a live deployment of this agent can be accessed [here](https://vgjrt-uyaaa-aaaal-qsiaq-cai.icp0.io/).
