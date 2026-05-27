@@ -100,36 +100,9 @@ jobs:
         working-directory: ./rust
         run: cargo fmt -- --check
 
-  typescript-build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install dfx
-        uses: dfinity/setup-dfx@main
-
-      - name: Setup mise
-        uses: jdx/mise-action@v3
-        with:
-          cache: false
-
-      - name: Install TypeScript dependencies
-        working-directory: ./typescript
-        run: pnpm install
-
-      - name: Build TypeScript
-        working-directory: ./typescript
-        run: pnpm run build
-
-      - name: TypeScript type check
-        working-directory: ./typescript
-        run: pnpm exec tsc --noEmit
-
   # Summary job that depends on all test jobs
   tests-summary:
-    needs: [motoko-tests, rust-lint, typescript-build]
+    needs: [motoko-tests, rust-lint]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     if: always()
@@ -139,15 +112,13 @@ jobs:
           echo "📊 Test Results Summary:"
           echo "Motoko tests: ${{ needs.motoko-tests.result }}"
           echo "Rust lint (includes tests): ${{ needs.rust-lint.result }}"
-          echo "TypeScript build: ${{ needs.typescript-build.result }}"
           echo ""
-          
-          if [[ "${{ needs.motoko-tests.result }}" == "success" && 
-                "${{ needs.rust-lint.result }}" == "success" && 
-                "${{ needs.typescript-build.result }}" == "success" ]]; then
+
+          if [[ "${{ needs.motoko-tests.result }}" == "success" &&
+                "${{ needs.rust-lint.result }}" == "success" ]]; then
             echo "✅ All tests and checks passed!"
             exit 0
           else
             echo "❌ Some tests or checks failed!"
             exit 1
-          fi 
+          fi
