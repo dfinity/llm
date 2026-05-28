@@ -1,7 +1,17 @@
-import { agent_backend } from "../../declarations/agent-backend";
-import { ChatMessage } from "../../declarations/agent-backend/agent-backend.did";
+import { createActor, type ChatMessage } from "./bindings/backend";
+import { getCanisterEnv } from "@icp-sdk/core/agent/canister-env";
 import botImg from "./bot.svg";
 import userImg from "./user.svg";
+
+interface CanisterEnv {
+  readonly "PUBLIC_CANISTER_ID:agent-backend": string;
+  readonly IC_ROOT_KEY: Uint8Array;
+}
+
+const env = getCanisterEnv<CanisterEnv>();
+const agent_backend = createActor(env["PUBLIC_CANISTER_ID:agent-backend"], {
+  agentOptions: { rootKey: env.IC_ROOT_KEY },
+});
 
 const PERSON_IMG = userImg;
 const BOT_IMG = botImg;
@@ -19,10 +29,10 @@ class App {
 
     this.chat = [
       {
+        __kind__: "assistant",
         assistant: {
-          content: [
+          content:
             "I'm a sovereign AI agent living on the Internet Computer. Ask me anything.",
-          ],
           tool_calls: [],
         },
       },
@@ -51,7 +61,7 @@ class App {
       "user" in message
         ? message.user.content
         : "assistant" in message
-        ? message.assistant.content
+        ? message.assistant.content ?? ""
         : "system" in message
         ? message.system.content
         : "tool" in message
@@ -93,8 +103,9 @@ class App {
 
       // Add the agent's response.
       this.chat.push({
+        __kind__: "assistant",
         assistant: {
-          content: [response],
+          content: response,
           tool_calls: [],
         },
       });
@@ -131,6 +142,7 @@ class App {
     if (!msgText) return;
 
     this.chat.push({
+      __kind__: "user",
       user: {
         content: msgText,
       },
@@ -139,8 +151,9 @@ class App {
 
     // Add user message to chat and show "thinking..." while waiting for response.
     this.chat.push({
+      __kind__: "assistant",
       assistant: {
-        content: ["Thinking..."],
+        content: "Thinking...",
         tool_calls: [],
       },
     });

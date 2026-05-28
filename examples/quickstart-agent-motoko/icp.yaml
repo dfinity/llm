@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://github.com/dfinity/icp-cli/raw/refs/tags/v0.1.0/docs/schemas/icp-yaml-schema.json
+
+canisters:
+  - name: llm
+    build:
+      steps:
+        - type: pre-built
+          url: https://github.com/dfinity/llm/releases/download/v0.3.1/llm-canister.wasm
+          sha256: 9fc6a172b13289428c6975895382c3c923fb641bcd8e8a5168469298c3cff310
+    init_args: "(opt variant { ollama }, null)"
+
+  - name: agent-backend
+    recipe:
+      type: "@dfinity/motoko@v4.1.0"
+      configuration:
+        main: src/backend/main.mo
+        candid: src/backend/backend.did
+
+  - name: agent-frontend
+    recipe:
+      type: "@dfinity/asset-canister@v2.1.0"
+      configuration:
+        dir: src/frontend/dist
+        build:
+          - pnpm --dir src/frontend install --frozen-lockfile
+          - pnpm --dir src/frontend build
+
+networks:
+  - name: local
+    mode: managed
+    gateway:
+      bind: 0.0.0.0
+      port: 8080
+
+environments:
+  - name: ic
+    network: ic
+    # `llm` is excluded: on mainnet the SDK targets the canonical canister
+    # (w36hm-eqaaa-aaaal-qr76a-cai) directly. Locally, `llm` is deployed from
+    # the pre-built WASM above and the SDK picks up its principal via the
+    # PUBLIC_CANISTER_ID:llm env var icp-cli auto-injects.
+    canisters:
+      - agent-backend
+      - agent-frontend
