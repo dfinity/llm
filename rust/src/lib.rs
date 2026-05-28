@@ -21,12 +21,16 @@ const LLM_CANISTER_ENV: &str = "PUBLIC_CANISTER_ID:llm";
 /// Resolves the LLM canister principal: prefers `PUBLIC_CANISTER_ID:llm` (auto-injected
 /// by `icp deploy`) and otherwise falls back to the mainnet canister.
 pub(crate) fn default_llm_canister() -> Principal {
-    if ic_cdk::api::env_var_name_exists(LLM_CANISTER_ENV) {
-        let id = ic_cdk::api::env_var_value(LLM_CANISTER_ENV);
-        Principal::from_text(&id)
-            .unwrap_or_else(|e| ic_cdk::trap(format!("invalid {LLM_CANISTER_ENV}: {e}")))
-    } else {
-        Principal::from_text(MAINNET_LLM_CANISTER).unwrap()
+    let env_value = ic_cdk::api::env_var_name_exists(LLM_CANISTER_ENV)
+        .then(|| ic_cdk::api::env_var_value(LLM_CANISTER_ENV));
+    resolve_llm_canister(env_value)
+}
+
+fn resolve_llm_canister(env_value: Option<String>) -> Principal {
+    match env_value {
+        Some(id) => Principal::from_text(&id)
+            .unwrap_or_else(|e| ic_cdk::trap(format!("invalid {LLM_CANISTER_ENV}: {e}"))),
+        None => Principal::from_text(MAINNET_LLM_CANISTER).unwrap(),
     }
 }
 
@@ -175,4 +179,23 @@ pub fn tool<S: Into<String>>(name: S) -> ToolBuilder {
 /// ```
 pub fn parameter<S: Into<String>>(name: S, type_: ParameterType) -> ParameterBuilder {
     ParameterBuilder::new(name, type_)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn resolve_llm_canister_defaults_to_mainnet() {
+        assert_eq!(
+            resolve_llm_canister(None),
+            Principal::from_text(MAINNET_LLM_CANISTER).unwrap(),
+        );
+    }
+
+    #[test]
+    fn resolve_llm_canister_honours_env_override() {
+        let canister = Principal::from_slice(&[1, 2, 3, 4]);
+        assert_eq!(resolve_llm_canister(Some(canister.to_text())), canister);
+    }
 }

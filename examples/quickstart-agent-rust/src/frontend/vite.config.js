@@ -23,9 +23,19 @@ export default defineConfig(({ command }) => {
     return base;
   }
 
-  const networkStatus = JSON.parse(
-    execSync(`icp network status -e ${environment} --json`, { encoding: 'utf-8' }),
-  );
+  let networkStatus;
+  try {
+    networkStatus = JSON.parse(
+      execSync(`icp network status -e ${environment} --json`, { encoding: 'utf-8' }),
+    );
+  } catch {
+    console.error(
+      `\n❌ Could not query network status for "${environment}".` +
+        `\n   Is the icp CLI installed? Try running \`pnpm install\` at the repo root.` +
+        `\n   If installed, start the network with: icp network start\n`,
+    );
+    process.exit(1);
+  }
 
   let canisterId;
   try {

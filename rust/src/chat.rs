@@ -127,9 +127,9 @@ impl ChatBuilder {
                 tools: tools_option,
             })
             .await
-            .expect("call to LLM canister failed")
+            .unwrap_or_else(|e| ic_cdk::trap(format!("LLM call failed: {e:?}")))
             .candid()
-            .expect("failed to decode LLM canister response")
+            .unwrap_or_else(|e| ic_cdk::trap(format!("failed to decode LLM response: {e:?}")))
     }
 }
 
