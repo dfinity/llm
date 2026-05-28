@@ -46,16 +46,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
+      - name: Setup mise
+        uses: jdx/mise-action@v3
         with:
-          toolchain: 1.84.1
+          cache: false
 
       - name: Cache cargo dependencies
         uses: actions/cache@v4
         with:
           path: |
-            ~/.cargo/bin/
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
@@ -76,17 +75,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
+      - name: Setup mise
+        uses: jdx/mise-action@v3
         with:
-          toolchain: 1.84.1
-          components: clippy, rustfmt
+          cache: false
 
       - name: Restore cargo cache
         uses: actions/cache/restore@v4
         with:
           path: |
-            ~/.cargo/bin/
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/

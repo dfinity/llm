@@ -1,0 +1,7 @@
+[tools]
+rust = { version = "1.94.0", components = "rustfmt,clippy", targets = "wasm32-unknown-unknown" }
+pnpm = "10.9.0"
+node = "22"
+
+[env]
+_.path = ["./node_modules/.bin"]

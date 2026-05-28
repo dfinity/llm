@@ -1,5 +1,5 @@
 generate:
-  dfx generate agent-backend
+  icp-bindgen --did-file src/backend/backend.did --out-dir src/frontend/src/bindings --force
 
 # Start the frontend development server
 start:

@@ -11,65 +11,24 @@ The following LLM models are available:
 - `Model::Qwen3_32B` - Qwen 3 32B model  
 - `Model::Llama4Scout` - Llama 4 Scout model
 
-## Local Development Setup
+## Local Development
 
-> **Note**: When developing locally, the architecture differs slightly from mainnet. Instead of using AI workers, the LLM canister connects directly to your local Ollama instance. This makes local development faster and easier, while still maintaining the same interface and behavior as the mainnet deployment. For more information about how the LLM canister works, see the [How Does it Work?](../README.md#how-does-it-work).
+When developing locally, the architecture differs slightly from mainnet: instead
+of relying on AI workers, the LLM canister connects directly to a local
+[Ollama](https://ollama.com/) instance. The interface is identical to mainnet —
+see [How Does it Work?](../README.md#how-does-it-work) for details.
 
+Before running an agent locally, start Ollama and pull the model you intend to
+use:
 
-Before using this library in local development, you need to set up the LLM canister dependency:
-
-### Prerequisites
-- [DFX](https://internetcomputer.org/docs/building-apps/getting-started/install) installed
-- [Ollama](https://ollama.com/) installed and running locally
-
-### Setup Steps with Ollama
-
-1. **Start Ollama** (required for local development):
 ```bash
-# Start the Ollama server
 ollama serve
-
-# Download the required model (one-time setup)
-ollama run llama3.1:8b
+ollama run llama3.1:8b   # one-time download
 ```
 
-2. **Add LLM canister to your dfx.json** (Note: This only works for dfx <=0.25.0):
-```json
-{
-  "canisters": {
-    "llm": {
-      "type": "pull",
-      "id": "w36hm-eqaaa-aaaal-qr76a-cai"
-    },
-    "your-canister": {
-      "dependencies": ["llm"],
-      "type": "rust",
-      "package": "your_package_name"
-    }
-  }
-}
-```
-
-Alternatively you can also define the llm dependency like this:
-```json
-    "llm": {
-      "candid": "https://github.com/dfinity/llm/releases/latest/download/llm-canister-ollama.did",
-      "type": "custom",
-      "specified_id": "w36hm-eqaaa-aaaal-qr76a-cai",
-      "remote": {
-        "id": {
-          "ic": "w36hm-eqaaa-aaaal-qr76a-cai"
-        }
-      },
-```
-
-3. **Deploy locally**:
-```bash
-dfx start --clean
-dfx deps pull
-dfx deps deploy
-dfx deploy
-```
+For complete, working project setups — including how to deploy the LLM canister
+locally — see the examples in this repository (e.g.
+[`examples/quickstart-agent-rust`](../examples/quickstart-agent-rust)).
 
 ## Usage
 
@@ -104,6 +63,31 @@ async fn example() {
                 content: "How big is the sun?".to_string(),
             },
         ])
+        .send()
+        .await;
+}
+```
+
+### Choosing the LLM canister
+
+By default the SDK addresses the mainnet LLM canister (`w36hm-eqaaa-aaaal-qr76a-cai`).
+When your canister is deployed with `icp deploy`, the SDK transparently picks up
+`PUBLIC_CANISTER_ID:llm` if it has been auto-injected — so the same code works
+against a local `llm` canister whose principal differs from mainnet, with no
+caller-side changes.
+
+For other cases (a fork, a mock, a staging deployment under a different name),
+override the canister explicitly:
+
+```rust
+use candid::Principal;
+use ic_llm::Model;
+
+async fn example() {
+    let custom = Principal::from_text("aaaaa-aa").unwrap();
+    ic_llm::chat(Model::Llama3_1_8B)
+        .with_canister(custom)
+        .with_messages(vec![])
         .send()
         .await;
 }

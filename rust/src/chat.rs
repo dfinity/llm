@@ -71,6 +71,7 @@ pub struct ChatBuilder {
     model: crate::Model,
     messages: Vec<ChatMessage>,
     tools: Vec<Tool>,
+    canister: Principal,
 }
 
 impl ChatBuilder {
@@ -80,6 +81,7 @@ impl ChatBuilder {
             model,
             messages: Vec::new(),
             tools: Vec::new(),
+            canister: crate::default_llm_canister(),
         }
     }
 
@@ -95,29 +97,38 @@ impl ChatBuilder {
         self
     }
 
+    /// Overrides the LLM canister to call.
+    ///
+    /// By default the SDK addresses the mainnet LLM canister
+    /// (`w36hm-eqaaa-aaaal-qr76a-cai`), unless `icp deploy` has auto-injected
+    /// `PUBLIC_CANISTER_ID:llm` on this canister — in which case that value is
+    /// used. Set this only when neither default is what you want (e.g. when
+    /// pointing at a fork, a mock, or a staging deployment under a different
+    /// name).
+    pub fn with_canister(mut self, canister: Principal) -> Self {
+        self.canister = canister;
+        self
+    }
+
     /// Sends the chat request to the LLM canister.
     pub async fn send(self) -> Response {
-        let llm_canister = Principal::from_text(crate::LLM_CANISTER).expect("invalid canister id");
-
         let tools_option = if self.tools.is_empty() {
             None
         } else {
             Some(self.tools)
         };
 
-        let res: (Response,) = ic_cdk::call(
-            llm_canister,
-            "v1_chat",
-            (Request {
+        ic_cdk::call::Call::bounded_wait(self.canister, "v1_chat")
+            .change_timeout(300)
+            .with_arg(Request {
                 model: self.model.to_string(),
                 messages: self.messages,
                 tools: tools_option,
-            },),
-        )
-        .await
-        .unwrap();
-
-        res.0
+            })
+            .await
+            .unwrap_or_else(|e| ic_cdk::trap(format!("LLM call failed: {e:?}")))
+            .candid()
+            .unwrap_or_else(|e| ic_cdk::trap(format!("failed to decode LLM response: {e:?}")))
     }
 }
 
@@ -162,6 +173,22 @@ mod tests {
         assert!(builder.messages.is_empty());
         assert_eq!(builder.tools.len(), 1);
         assert_eq!(builder.tools[0], tool);
+    }
+
+    #[test]
+    fn chat_builder_defaults_to_mainnet_llm_canister() {
+        let builder = ChatBuilder::new(Model::Llama3_1_8B);
+        assert_eq!(
+            builder.canister,
+            Principal::from_text(crate::MAINNET_LLM_CANISTER).unwrap(),
+        );
+    }
+
+    #[test]
+    fn chat_builder_with_canister() {
+        let canister = Principal::from_slice(&[1, 2, 3, 4]);
+        let builder = ChatBuilder::new(Model::Llama3_1_8B).with_canister(canister);
+        assert_eq!(builder.canister, canister);
     }
 
     #[test]
