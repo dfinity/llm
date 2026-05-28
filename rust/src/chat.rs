@@ -121,6 +121,7 @@ impl ChatBuilder {
         };
 
         ic_cdk::call::Call::bounded_wait(llm_canister, "v1_chat")
+            .change_timeout(300)
             .with_arg(Request {
                 model: self.model.to_string(),
                 messages: self.messages,
