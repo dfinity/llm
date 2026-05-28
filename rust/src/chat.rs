@@ -71,7 +71,7 @@ pub struct ChatBuilder {
     model: crate::Model,
     messages: Vec<ChatMessage>,
     tools: Vec<Tool>,
-    canister: Option<Principal>,
+    canister: Principal,
 }
 
 impl ChatBuilder {
@@ -81,7 +81,7 @@ impl ChatBuilder {
             model,
             messages: Vec::new(),
             tools: Vec::new(),
-            canister: None,
+            canister: crate::default_llm_canister(),
         }
     }
 
@@ -106,21 +106,19 @@ impl ChatBuilder {
     /// pointing at a fork, a mock, or a staging deployment under a different
     /// name).
     pub fn with_canister(mut self, canister: Principal) -> Self {
-        self.canister = Some(canister);
+        self.canister = canister;
         self
     }
 
     /// Sends the chat request to the LLM canister.
     pub async fn send(self) -> Response {
-        let llm_canister = self.canister.unwrap_or_else(crate::default_llm_canister);
-
         let tools_option = if self.tools.is_empty() {
             None
         } else {
             Some(self.tools)
         };
 
-        ic_cdk::call::Call::bounded_wait(llm_canister, "v1_chat")
+        ic_cdk::call::Call::bounded_wait(self.canister, "v1_chat")
             .change_timeout(300)
             .with_arg(Request {
                 model: self.model.to_string(),
@@ -178,10 +176,19 @@ mod tests {
     }
 
     #[test]
+    fn chat_builder_defaults_to_mainnet_llm_canister() {
+        let builder = ChatBuilder::new(Model::Llama3_1_8B);
+        assert_eq!(
+            builder.canister,
+            Principal::from_text(crate::MAINNET_LLM_CANISTER).unwrap(),
+        );
+    }
+
+    #[test]
     fn chat_builder_with_canister() {
         let canister = Principal::from_slice(&[1, 2, 3, 4]);
         let builder = ChatBuilder::new(Model::Llama3_1_8B).with_canister(canister);
-        assert_eq!(builder.canister, Some(canister));
+        assert_eq!(builder.canister, canister);
     }
 
     #[test]
