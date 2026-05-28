@@ -21,3 +21,6 @@ target/
 node_modules/
 dist/
 .svelte-kit/
+
+# environment files (never commit secrets)
+.env

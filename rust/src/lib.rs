@@ -15,19 +15,21 @@ pub use tool::{
 // The mainnet principal of the LLM canister.
 const MAINNET_LLM_CANISTER: &str = "w36hm-eqaaa-aaaal-qr76a-cai";
 
-// Name of the canister env var icp-cli injects with the local llm canister id.
-const LLM_CANISTER_ENV: &str = "PUBLIC_CANISTER_ID:llm";
-
 /// Resolves the LLM canister principal: prefers `PUBLIC_CANISTER_ID:llm` (auto-injected
 /// by `icp deploy`) and otherwise falls back to the mainnet canister.
 pub(crate) fn default_llm_canister() -> Principal {
-    if ic_cdk::api::env_var_name_exists(LLM_CANISTER_ENV) {
-        let id = ic_cdk::api::env_var_value(LLM_CANISTER_ENV);
-        Principal::from_text(&id)
-            .unwrap_or_else(|e| ic_cdk::trap(format!("invalid {LLM_CANISTER_ENV}: {e}")))
-    } else {
-        Principal::from_text(MAINNET_LLM_CANISTER).unwrap()
+    // The env-var lookup only works in a canister.
+    // Skip in unit tests.
+    #[cfg(not(test))]
+    {
+        const LLM_CANISTER_ENV: &str = "PUBLIC_CANISTER_ID:llm";
+        if ic_cdk::api::env_var_name_exists(LLM_CANISTER_ENV) {
+            let id = ic_cdk::api::env_var_value(LLM_CANISTER_ENV);
+            return Principal::from_text(&id)
+                .unwrap_or_else(|e| ic_cdk::trap(format!("invalid {LLM_CANISTER_ENV}: {e}")));
+        }
     }
+    Principal::from_text(MAINNET_LLM_CANISTER).unwrap()
 }
 
 /// Supported LLM models.
