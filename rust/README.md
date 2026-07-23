@@ -95,8 +95,6 @@ async fn example() {
 
 ### Advanced Usage with Tools
 
-For a complete example of using tools with the LLM library, see the [ICP Lookup Agent example](examples/icp-lookup-agent-rust).
-
 #### Understanding Tools
 
 **Tools** are custom functions that you define and make available to the LLM. 
