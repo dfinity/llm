@@ -39,19 +39,6 @@ Additionally, a live deployment of this agent can be accessed [here](https://vgj
 
 ![Screenshot of the quickstart agent](screenshot.png)
 
-### ICP Lookup Agent
-
-Showcases what it's like to build an agent that specializes in a specific task. In this case, the task is to lookup ICP prices.
-
-A Rust and a Motoko implementation are provided in the `examples` folder.
-- [Rust ICP Lookup Agent](examples/icp-lookup-agent-rust/README.md)
-- [Motoko ICP Lookup Agent](examples/icp-lookup-agent-motoko/README.md)
-
-
-Additionally, a live deployment of this agent can be accessed [here](https://twf3b-uqaaa-aaaal-qsiva-cai.icp0.io/).
-
-![Screenshot of the ICP lookup agent](./examples/icp-lookup-agent-rust/screenshot.png)
-
 ## Understanding Chat Message Roles
 
 When building chat applications, you'll work with different message types that serve specific purposes:
