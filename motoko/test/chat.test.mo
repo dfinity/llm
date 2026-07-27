@@ -5,7 +5,7 @@ import { test } "mo:test";
 test(
     "create chat builder",
     func() {
-        let builder = Chat.ChatBuilder(#Llama3_1_8B);
+        let builder = Chat.ChatBuilder("llama3.1:8b");
 
         let request = builder.build();
         assert request == {
@@ -24,7 +24,7 @@ test(
             #user { content = "Hello" },
         ];
 
-        let builder = Chat.ChatBuilder(#Llama3_1_8B).withMessages(messages);
+        let builder = Chat.ChatBuilder("llama3.1:8b").withMessages(messages);
         
         let request = builder.build();
         assert request == {
@@ -42,7 +42,7 @@ test(
             .withDescription("A test tool")
             .build();
 
-        let builder = Chat.ChatBuilder(#Llama3_1_8B).withTools([tool]);
+        let builder = Chat.ChatBuilder("llama3.1:8b").withTools([tool]);
         
         let request = builder.build();
         assert request == {
@@ -62,7 +62,7 @@ test(
 
         let tool = (Tool.ToolBuilder("test_tool")).build();
 
-        let builder = Chat.ChatBuilder(#Llama3_1_8B)
+        let builder = Chat.ChatBuilder("llama3.1:8b")
             .withMessages(messages)
             .withTools([tool]);
             
@@ -97,10 +97,3 @@ test(
         assert Tool.getArgument(function_call, "arg3") == null;
     },
 );
-
-test(
-    "model to text conversion",
-    func() {
-        assert Chat.modelToText(#Llama3_1_8B) == "llama3.1:8b";
-    },
-); 

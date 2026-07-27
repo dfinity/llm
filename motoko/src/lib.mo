@@ -8,10 +8,9 @@ module {
   public type AssistantMessage = Chat.AssistantMessage;
   public type Response = Chat.Response;
   public type Request = Chat.Request;
-  public type Model = Chat.Model;
-  
 
-  public func prompt(model : Chat.Model, promptStr : Text) : async Text {
+
+  public func prompt(model : Text, promptStr : Text) : async Text {
     let response = await Chat.ChatBuilder(model).withMessages([
       #user({
         content = promptStr;
@@ -24,7 +23,7 @@ module {
     };
   };
 
-  public func chat(model : Chat.Model) : Chat.ChatBuilder {
+  public func chat(model : Text) : Chat.ChatBuilder {
     Chat.ChatBuilder(model);
   };
 
