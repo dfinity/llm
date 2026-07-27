@@ -23,7 +23,7 @@ Add your API key to the `llm` canister's `init_args` in `icp.yaml`
 (see [Getting an API key](#getting-an-api-key)):
 
 ```yaml
-init_args: '(opt variant { https = record { api_key = "YOUR_API_KEY" } })'
+init_args: '(opt variant { https = record { api_key = "<YOUR_IIG_API_KEY>" } })'
 ```
 
 Then start the local replica and deploy everything:
