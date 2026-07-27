@@ -5,11 +5,28 @@ A library for making requests to the LLM canister on the Internet Computer.
 
 ## Supported Models
 
-The following LLM models are available:
+Models are identified by their string name (passed to `ic_llm::prompt` and
+`ic_llm::chat`). The available models are:
 
-- `Model::Llama3_1_8B` - Llama 3.1 8B model
-- `Model::Qwen3_32B` - Qwen 3 32B model  
-- `Model::Llama4Scout` - Llama 4 Scout model
+| Model string      | Pricing |
+| ----------------- | ------- |
+| `"llama3.1:8b"`   | Free    |
+| `"qwen3:32b"`     | Free    |
+| `"llama4-scout"`  | Free    |
+| `"qwen2.5:0.5b"`  | Free    |
+| `"gemma3:27b"`    | Paid    |
+| `"z-ai:glm-5.2"`  | Paid    |
+
+Models are added frequently — see the [LLM canister](../README.md) for the
+authoritative, up-to-date list.
+
+### Paying for models
+
+`send()` automatically attaches 100B cycles to every request. Paid models are
+charged from those cycles (any unused portion is refunded); free models refund
+the full amount. Because cycles are always attached, **the calling canister must
+hold at least 100B cycles when `send()` runs, or the call traps** — this applies
+even when using a free model.
 
 ## Local Development
 
@@ -39,10 +56,8 @@ locally — see the examples in this repository (e.g.
 The simplest way to interact with a model is by sending a single prompt:
 
 ```rust
-use ic_llm::Model;
-
 async fn example() -> String {
-    ic_llm::prompt(Model::Llama3_1_8B, "What's the speed of light?").await
+    ic_llm::prompt("llama3.1:8b", "What's the speed of light?").await
 }
 ```
 
@@ -51,10 +66,10 @@ async fn example() -> String {
 For more complex interactions, you can send multiple messages in a conversation:
 
 ```rust
-use ic_llm::{Model, ChatMessage};
+use ic_llm::ChatMessage;
 
 async fn example() {
-    ic_llm::chat(Model::Llama3_1_8B)
+    ic_llm::chat("llama3.1:8b")
         .with_messages(vec![
             ChatMessage::System {
                 content: "You are a helpful assistant".to_string(),
@@ -81,11 +96,9 @@ override the canister explicitly:
 
 ```rust
 use candid::Principal;
-use ic_llm::Model;
-
 async fn example() {
     let custom = Principal::from_text("aaaaa-aa").unwrap();
-    ic_llm::chat(Model::Llama3_1_8B)
+    ic_llm::chat("llama3.1:8b")
         .with_canister(custom)
         .with_messages(vec![])
         .send()
@@ -123,10 +136,10 @@ When you provide tools to the LLM, it can decide when and how to use them based 
 You can define tools that the LLM can use to perform actions:
 
 ```rust
-use ic_llm::{Model, ChatMessage, ParameterType};
+use ic_llm::{ChatMessage, ParameterType};
 
 async fn example() {
-    ic_llm::chat(Model::Llama3_1_8B)
+    ic_llm::chat("llama3.1:8b")
         .with_messages(vec![
             ChatMessage::System {
                 content: "You are a helpful assistant".to_string(),
@@ -155,10 +168,10 @@ async fn example() {
 When the LLM decides to use one of your tools, you can handle the call:
 
 ```rust
-use ic_llm::{Model, ChatMessage, ParameterType, Response};
+use ic_llm::{ChatMessage, ParameterType, Response};
 
 async fn example() -> Response {
-    let response = ic_llm::chat(Model::Llama3_1_8B)
+    let response = ic_llm::chat("llama3.1:8b")
         .with_messages(vec![
             ChatMessage::System {
                 content: "You are a helpful assistant".to_string(),
@@ -208,7 +221,7 @@ async fn get_weather(location: &str) -> String {
 Here's a more complete example showing how to handle tool calls and continue the conversation:
 
 ```rust
-use ic_llm::{Model, ChatMessage, ParameterType, Response};
+use ic_llm::{ChatMessage, ParameterType, Response};
 
 async fn handle_chat_with_tools(user_message: String) -> String {
     let mut messages = vec![
@@ -234,7 +247,7 @@ async fn handle_chat_with_tools(user_message: String) -> String {
             .build()
     ];
 
-    let response = ic_llm::chat(Model::Llama3_1_8B)
+    let response = ic_llm::chat("llama3.1:8b")
         .with_messages(messages.clone())
         .with_tools(tools)
         .send()
@@ -266,7 +279,7 @@ async fn handle_chat_with_tools(user_message: String) -> String {
         }
 
         // Get final response from LLM with tool results
-        let final_response = ic_llm::chat(Model::Llama3_1_8B)
+        let final_response = ic_llm::chat("llama3.1:8b")
             .with_messages(messages)
             .send()
             .await;

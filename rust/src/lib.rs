@@ -1,6 +1,5 @@
 #![doc = include_str!("../README.md")]
 use candid::Principal;
-use std::fmt;
 
 // Define our modules
 mod chat;
@@ -32,37 +31,19 @@ pub(crate) fn default_llm_canister() -> Principal {
     Principal::from_text(MAINNET_LLM_CANISTER).unwrap()
 }
 
-/// Supported LLM models.
-#[derive(Debug)]
-pub enum Model {
-    Llama3_1_8B,
-    Qwen3_32B,
-    Llama4Scout,
-}
-
-impl fmt::Display for Model {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let text = match self {
-            Model::Llama3_1_8B => "llama3.1:8b",
-            Model::Qwen3_32B => "qwen3:32b",
-            Model::Llama4Scout => "llama4-scout",
-        };
-        write!(f, "{}", text)
-    }
-}
-
 /// Sends a single message to a model.
+///
+/// `model` is the canister's model identifier, e.g. `"llama3.1:8b"` (free) or
+/// `"gemma3:27b"` (paid). See the README for the current list.
 ///
 /// # Example
 ///
 /// ```
-/// use ic_llm::Model;
-///
 /// # async fn prompt_example() -> String {
-/// ic_llm::prompt(Model::Llama3_1_8B, "What's the speed of light?").await
+/// ic_llm::prompt("llama3.1:8b", "What's the speed of light?").await
 /// # }
 /// ```
-pub async fn prompt<P: ToString>(model: Model, prompt_str: P) -> String {
+pub async fn prompt<P: ToString>(model: impl Into<String>, prompt_str: P) -> String {
     let response = ChatBuilder::new(model)
         .with_messages(vec![ChatMessage::User {
             content: prompt_str.to_string(),
@@ -81,11 +62,11 @@ pub async fn prompt<P: ToString>(model: Model, prompt_str: P) -> String {
 /// # Example
 ///
 /// ```
-/// use ic_llm::{Model, ChatMessage, Response};
+/// use ic_llm::{ChatMessage, Response};
 ///
 /// # async fn chat_example() -> Response {
 /// // Basic usage
-/// ic_llm::chat(Model::Llama3_1_8B)
+/// ic_llm::chat("llama3.1:8b")
 ///     .with_messages(vec![
 ///         ChatMessage::System {
 ///             content: "You are a helpful assistant".to_string(),
@@ -102,10 +83,10 @@ pub async fn prompt<P: ToString>(model: Model, prompt_str: P) -> String {
 /// You can also add tools to the chat:
 ///
 /// ```
-/// use ic_llm::{Model, ChatMessage, ParameterType, Response};
+/// use ic_llm::{ChatMessage, ParameterType, Response};
 ///
 /// # async fn chat_with_tools_example() -> Response {
-/// ic_llm::chat(Model::Llama3_1_8B)
+/// ic_llm::chat("llama3.1:8b")
 ///     .with_messages(vec![
 ///         ChatMessage::System {
 ///             content: "You are a helpful assistant".to_string(),
@@ -128,7 +109,7 @@ pub async fn prompt<P: ToString>(model: Model, prompt_str: P) -> String {
 ///     .await
 /// # }
 /// ```
-pub fn chat(model: Model) -> ChatBuilder {
+pub fn chat(model: impl Into<String>) -> ChatBuilder {
     ChatBuilder::new(model)
 }
 
