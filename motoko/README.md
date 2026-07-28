@@ -4,11 +4,28 @@ A library for making requests to the LLM canister on the Internet Computer.
 
 ## Supported Models
 
-The following LLM models are available:
+Models are identified by their string name (passed to `LLM.prompt` and
+`LLM.chat`). The available models are:
 
-- `#Llama3_1_8B` - Llama 3.1 8B model
-- `#Qwen3_32B` - Qwen 3 32B model
-- `#Llama4Scout` - Llama 4 Scout model
+| Model string      | Pricing |
+| ----------------- | ------- |
+| `"llama3.1:8b"`   | Free    |
+| `"qwen3:32b"`     | Free    |
+| `"llama4-scout"`  | Free    |
+| `"qwen2.5:0.5b"`  | Free    |
+| `"gemma3:27b"`    | Paid    |
+| `"z-ai:glm-5.2"`  | Paid    |
+
+Models are added frequently — see the [LLM canister](../README.md) for the
+authoritative, up-to-date list.
+
+### Paying for models
+
+`send()` automatically attaches 100B cycles to every request. Paid models are
+charged from those cycles (any unused portion is refunded); free models refund
+the full amount. Because cycles are always attached, **the calling canister must
+hold at least 100B cycles when `send()` runs, or the call traps** — this applies
+even when using a free model.
 
 ## Local Development Setup
 
@@ -85,7 +102,7 @@ import LLM "mo:llm";
 
 actor {
   public func prompt(prompt : Text) : async Text {
-    await LLM.prompt(#Llama3_1_8B, prompt);
+    await LLM.prompt("llama3.1:8b", prompt);
   };
 }
 ```
@@ -99,7 +116,7 @@ import LLM "mo:llm";
 
 actor {
   public func example() {
-    let response = await LLM.chat(#Llama3_1_8B).withMessages([
+    let response = await LLM.chat("llama3.1:8b").withMessages([
       #system_ {
         content = "You are a helpful assistant.";
       },
@@ -141,7 +158,7 @@ import LLM "mo:llm";
 
 actor {
   public func example() {
-    let response = await LLM.chat(#Llama3_1_8B)
+    let response = await LLM.chat("llama3.1:8b")
       .withMessages([
         #system_ {
           content = "You are a helpful assistant."
@@ -174,7 +191,7 @@ import Debug "mo:base/Debug";
 
 actor {
   public func handleChat(userMessage : Text) : async Text {
-    let response = await LLM.chat(#Llama3_1_8B)
+    let response = await LLM.chat("llama3.1:8b")
       .withMessages([
         #system_ {
           content = "You are a helpful assistant."
@@ -233,7 +250,7 @@ actor {
         };
         
         // Send tool results back to LLM for final response
-        let finalResponse = await LLM.chat(#Llama3_1_8B)
+        let finalResponse = await LLM.chat("llama3.1:8b")
           .withMessages(Array.append([
             #system_ { content = "You are a helpful assistant." },
             #user { content = userMessage },
