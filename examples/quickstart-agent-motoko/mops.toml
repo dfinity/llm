@@ -1,2 +1,10 @@
 [dependencies]
-llm = "2.1.0"
+# Local path-dep until a release with env-var-based canister resolution is
+# published to the mops registry.
+llm = "../../motoko"
+# Transitive dep of the local `llm` path-dep; mops doesn't auto-resolve these
+# for path-deps, so it's declared explicitly here.
+base = "0.14.9"
+
+[toolchain]
+moc = "1.8.2"

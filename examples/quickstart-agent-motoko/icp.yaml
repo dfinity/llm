@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://github.com/dfinity/icp-cli/raw/refs/tags/v0.1.0/docs/schemas/icp-yaml-schema.json
+
+canisters:
+  - name: llm
+    build:
+      steps:
+        - type: pre-built
+          url: https://github.com/dfinity/llm/releases/download/v1.1.0/llm-canister.wasm
+          sha256: fe79870bcb33fec5e102dd5ef91a9723aa7a0ab41fda635dad1b4ca20315ba07
+    init_args: '(opt variant {
+      https = record {
+        api_key = "iig_aWF4tapZZEn_j28YjA0HseBpCUWU0thka3VQHB94pMc"
+      }
+    })'
+
+  - name: agent
+    recipe:
+      type: "@dfinity/motoko@v4.1.0"
+      configuration:
+        main: src/main.mo
+
+networks:
+  - name: local
+    mode: managed
+    gateway:
+      bind: 0.0.0.0
+      port: 8080
+
+environments:
+  - name: ic
+    network: ic
+    canisters:
+      - agent

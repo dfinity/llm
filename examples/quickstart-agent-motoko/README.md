@@ -1,103 +1,97 @@
 # Quickstart AI Agent (Motoko)
 
-This is a simple agent that simply relays whatever messages the user gives to the underlying models without any modification.
-It's meant to serve as a boilerplate project for those who want to get started building agents on the IC.
+A minimal, command-line agent that relays whatever message you give it to the
+underlying model without modification. Use it as a starting point for your own
+agents on the IC.
 
-![Screenshot of the quickstart agent](../../screenshot.png)
+The `agent` canister exposes two methods:
 
-## Quickstart with Ollama
-Prerequisites
-- [DFX](https://internetcomputer.org/docs/building-apps/getting-started/install) installed
-- [Ollama](https://ollama.com/) installed
-- [PNPM](https://pnpm.io/) installed
+- `prompt(text) -> text` — send a single prompt, get the model's reply.
+- `chat(vec ChatMessage) -> text` — send a multi-message conversation.
+
+## Prerequisites
+
+- [mise](https://mise.jdx.dev/) to install Node and pnpm at the versions
+  pinned in the repo's `mise.toml` (or install them yourself).
+- Run `pnpm install` at the repo root once — that brings in
+  [`icp-cli`](https://github.com/dfinity/icp-cli), `ic-wasm`, and
+  [`mops`](https://docs.mops.one/quick-start) (the Motoko package manager
+  the `@dfinity/motoko` recipe shells out to) as project devDependencies,
+  exposed on PATH via mise's `_.path` config.
+- An API key for the Internet Intelligence Gateway — see
+  [Getting an API key](#getting-an-api-key). The local `llm` canister uses it
+  to serve prompts.
+
+## Quickstart
+
+Add your API key to the `llm` canister's `init_args` in `icp.yaml`
+(see [Getting an API key](#getting-an-api-key)):
+
+```yaml
+init_args: '(opt variant { https = record { api_key = "<YOUR_IIG_API_KEY>" } })'
+```
+
+Then start the local replica and deploy the canisters:
 
 ```bash
-# start ollama server
-ollama serve
-
-# Download the required model (one-time setup):
-ollama run llama3.1:8b
-
-# Start the local Internet Computer:
-dfx start --clean
-
-# Deploy the canisters:
-dfx deploy
-dfx deps deploy
+icp network start -d
+icp deploy
 ```
 
-Finally, access the agent at:
-```
-http://{FRONTEND_CANISTER_ID}.localhost:8080
-```
-
-## Deployment
-
-### LLM Backend Configuration
-The LLM canister supports two backend options for processing prompts:
-
-1. **Ollama (Local)**: A free, self-hosted solution that runs on your local machine. Perfect for testing and development without any costs.
-
-2. **OpenRouter API**: A cloud-based solution that can handle larger models that might be too resource-intensive for local machines. Requires an API key.
-Note: This used to Groq for v0.2.1 and lower.
-
-You can select your preferred backend by initialising the llm dependency through `dfx deps init` (see below for init arguments).
-
-
-#### Configure with Ollama
-To be able to test the agent locally, you'll need a server for processing the agent's prompts. For that, we'll use `ollama`, which is a tool that can download and serve LLMs.
-See the documentation on the [Ollama website](https://ollama.com/) to install it. Once it's installed, run:
-
-```
-ollama serve
-# Expected to start listening on port 11434
-```
-
-The above command will start the Ollama server, so that it can process requests by the agent. Additionally, and in a separate window, run the following command to download the LLM that will be used by the agent:
-
-```
-ollama run llama3.1:8b
-```
-
-The above command will download an 8B parameter model, which is around 4GiB. Once the command executes and the model is loaded, you can terminate it. You won't need to do this step again.
-
-Initialise the llm canister with `dfx deps init llm --argument '(opt variant { ollama }, null)'`. You can also inspect `deps/init.json` to see which backend will be used when launching the canister.
-This backend is also the default backend and thus will work without calling the initialisation if the `deps/init.json` has not been changed.
-
-
-#### Configure with OpenRouter
-As an alternative you can use the [OpenRouter API](https://openrouter.ai/). You will need to create an [API key](https://openrouter.ai/settings/keys) first.
-
-Initialise the llm canister with `dfx deps init llm --argument '(opt variant { openrouter = record { api_key = "{YOUR_API_KEY}" } }, null)'`, replacing `YOUR_API_KEY` with your own. You can also inspect `deps/init.json` to see which backend will be used when launching the canister.
-
-### Deployment
-
-Once your backend is set and initialized, you can start dfx and deploy the canisters.
-
-First, install `pnpm` and run `pnpm install` in the `src/frontend` directory.
-
-Then, in one terminal window, run:
+Now call the agent. A single prompt:
 
 ```bash
-dfx start --clean
+icp canister call agent prompt '("Write a haiku about the Internet Computer.")' -e local
 ```
 
-Then pull the dependency and deploy the canisters in another window:
+Or a multi-message conversation via `chat`:
 
 ```bash
-dfx deps pull
-dfx deploy
-dfx deps deploy  # deploys the llm canister
+icp canister call agent chat '(vec {
+  variant { system = record { content = "You are a helpful assistant for Internet Computer developers." } };
+  variant { user = record { content = "Suggest a fun name for my new canister." } };
+})' -e local
 ```
 
-Once the deployment completes, you'll see the URL for the `agent-frontend` that looks like this:
+## Getting an API key
 
-```
-http://0.0.0.0:8080/?canisterId={FRONTEND_CANISTER_ID}
+The local `llm` canister runs in `https` mode: it serves prompts by making
+HTTPS outcalls to the Internet Intelligence Gateway, authenticated with an API
+key. To get a key:
+
+1. Sign up at https://inference.internetcomputer.org/beta.
+
+Put the key in the `llm` canister's `init_args` in `icp.yaml`:
+
+```yaml
+init_args: '(opt variant { https = record { api_key = "YOUR_API_KEY" } })'
 ```
 
-Due to CORS policies on the browser, you should instead access the agent using the following URL:
+If you change the key after the first deploy, reinstall the `llm` canister so
+the new init args take effect:
 
+```bash
+icp deploy llm --mode reinstall
 ```
-http://{FRONTEND_CANISTER_ID}.localhost:8080
+
+## How it works locally
+
+`icp-cli` injects `PUBLIC_CANISTER_ID:llm` into `agent` at deploy
+time, so the `mo:llm` library picks up the local replica's `llm` canister
+principal automatically. On mainnet that env var isn't set and the library
+falls back to the well-known principal `w36hm-eqaaa-aaaal-qr76a-cai`. No
+code changes needed between environments.
+
+## Deploying to mainnet
+
+Use the `ic` environment:
+
+```bash
+icp deploy -e ic
 ```
+
+The first deploy creates a fresh `agent` canister on mainnet; its
+principal is written to `.icp/data/mappings/ic.ids.json`, which should be
+committed so future deploys reuse it. The `llm` canister is excluded from the
+`ic` environment in `icp.yaml` — mainnet already runs the canonical LLM
+canister at `w36hm-…` and the SDK addresses it directly.
