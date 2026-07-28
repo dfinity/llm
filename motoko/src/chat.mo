@@ -1,20 +1,45 @@
+import Prim "mo:⛔";
 import Tool "./tool";
 
 module {
-    private let llmCanister = actor ("w36hm-eqaaa-aaaal-qr76a-cai") : actor {
+    /// The mainnet principal of the LLM canister.
+    let MAINNET_LLM_CANISTER = "w36hm-eqaaa-aaaal-qr76a-cai";
+
+    type LlmCanister = actor {
         v1_chat : (Request) -> async Response;
     };
 
-    /// Cycles attached to every `v1_chat` call.
+    /// Resolves the LLM canister to call.
     ///
-    /// Paid models require a minimum of 100B cycles to accept a request. Free
-    /// models charge nothing: they accept no cycles and the full amount is
-    /// refunded. Paid models accept only what's needed to cover the request and
-    /// refund the remainder, so attaching this amount unconditionally is safe.
+    /// Prefers the `PUBLIC_CANISTER_ID:llm` environment variable (auto-injected
+    /// by `icp deploy` so the library targets the local `llm` canister during
+    /// development) and otherwise falls back to the mainnet canister.
+    func llmCanister<system>() : LlmCanister {
+        let id = switch (Prim.envVar<system>("PUBLIC_CANISTER_ID:llm")) {
+            case (?principal) principal;
+            case null MAINNET_LLM_CANISTER;
+        };
+        actor (id) : LlmCanister;
+    };
+
+    /// Cycles attached to a `v1_chat` call for a paid model.
     ///
-    /// Note: the calling canister must hold at least this many cycles when
-    /// `send()` runs, otherwise the call traps.
+    /// Paid models require a minimum of 100B cycles to accept a request; they
+    /// charge only what the request costs and refund the remainder. Free models
+    /// accept no cycles, so we attach none — see `FREE_MODELS`.
     let CYCLES_PER_CHAT : Nat = 100_000_000_000;
+
+    /// Models that are free to call. Requests to these attach no cycles, so the
+    /// calling canister doesn't need to hold any. Every other model is treated
+    /// as paid and gets `CYCLES_PER_CHAT` attached.
+    let FREE_MODELS = ["llama3.1:8b", "qwen3:32b"];
+
+    func isFreeModel(model : Text) : Bool {
+        for (freeModel in FREE_MODELS.vals()) {
+            if (freeModel == model) return true;
+        };
+        false;
+    };
 
     /// A message in a chat.
     public type ChatMessage = {
@@ -78,12 +103,13 @@ module {
 
         /// Sends the chat request to the LLM canister.
         ///
-        /// Attaches `CYCLES_PER_CHAT` cycles to pay for paid models. Free models
-        /// refund the full amount. The calling canister must hold at least that
-        /// many cycles or this call traps.
+        /// Paid models get `CYCLES_PER_CHAT` cycles attached (the calling
+        /// canister must hold at least that many or this call traps); free
+        /// models get none.
         public func send() : async Response {
             let request = build();
-            await (with cycles = CYCLES_PER_CHAT) llmCanister.v1_chat(request)
+            let cyclesToAttach = if (isFreeModel(_model)) 0 else CYCLES_PER_CHAT;
+            await (with cycles = cyclesToAttach) llmCanister<system>().v1_chat(request)
         };
     };
 };
