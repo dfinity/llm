@@ -13,22 +13,22 @@ the IC.
 - Run `pnpm install` at the repo root once — that brings in
   [`icp-cli`](https://github.com/dfinity/icp-cli) and `ic-wasm` as project
   devDependencies, exposed on PATH via mise's `_.path` config.
-- One of the two LLM backends below: by default the local `llm` canister
-  uses [Ollama](https://ollama.com/) (free, runs on your machine). If you'd
-  rather use [OpenRouter](https://openrouter.ai/) (a paid cloud service that
-  can host larger models), see [LLM backend selection](#llm-backend-selection)
-  for how to switch.
+- An API key for the Internet Intelligence Gateway — see
+  [Getting an API key](#getting-an-api-key). The local `llm` canister uses it
+  to serve prompts.
 
-## Quickstart with Ollama
+## Quickstart
+
+Add your API key to the `llm` canister's `init_args` in `icp.yaml`
+(see [Getting an API key](#getting-an-api-key)):
+
+```yaml
+init_args: '(opt variant { https = record { api_key = "<YOUR_IIG_API_KEY>" } })'
+```
+
+Then start the local replica and deploy everything:
 
 ```bash
-# Start Ollama (one window).
-ollama serve
-
-# Pull the model (one-time).
-ollama run llama3.1:8b
-
-# Start the local replica and deploy everything (separate window).
 icp network start -d
 icp deploy
 ```
@@ -36,29 +36,22 @@ icp deploy
 The frontend URL is printed at the end of `icp deploy`. Open it in a browser
 (use the `*.localhost:8080` form to avoid CORS issues).
 
-## LLM backend selection
+## Getting an API key
 
-The on-chain `llm` canister has two backends:
+The local `llm` canister runs in `https` mode: it serves prompts by making
+HTTPS outcalls to the Internet Intelligence Gateway, authenticated with an API
+key. To get a key:
 
-1. **Ollama** (local, free) — the default. Suitable for development.
-2. **OpenRouter** (cloud, paid) — needed for larger models. Requires an
-   [API key](https://openrouter.ai/settings/keys).
+1. Sign up at https://inference.internetcomputer.org/beta.
 
-The choice is encoded in `icp.yaml`'s `init_args` for the `llm` canister. To
-switch from the default Ollama setup to OpenRouter, edit `icp.yaml`:
+Put the key in the `llm` canister's `init_args` in `icp.yaml`:
 
 ```yaml
-canisters:
-  - name: llm
-    build:
-      steps:
-        - type: pre-built
-          url: https://github.com/dfinity/llm/releases/download/v0.3.1/llm-canister.wasm
-          sha256: 9fc6a172b13289428c6975895382c3c923fb641bcd8e8a5168469298c3cff310
-    init_args: '(opt variant { openrouter = record { api_key = "YOUR_API_KEY" } }, null)'
+init_args: '(opt variant { https = record { api_key = "YOUR_API_KEY" } })'
 ```
 
-Then reinstall the `llm` canister so the new init args take effect:
+If you change the key after the first deploy, reinstall the `llm` canister so
+the new init args take effect:
 
 ```bash
 icp deploy llm --mode reinstall

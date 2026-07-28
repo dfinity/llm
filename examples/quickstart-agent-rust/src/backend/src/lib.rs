@@ -1,13 +1,13 @@
-use ic_llm::{ChatMessage, Model};
+use ic_llm::ChatMessage;
 
 #[ic_cdk::update]
 async fn prompt(prompt_str: String) -> String {
-    ic_llm::prompt(Model::Llama3_1_8B, prompt_str).await
+    ic_llm::prompt("llama3.1:8b", prompt_str).await
 }
 
 #[ic_cdk::update]
 async fn chat(messages: Vec<ChatMessage>) -> String {
-    let response = ic_llm::chat(Model::Llama3_1_8B)
+    let response = ic_llm::chat("llama3.1:8b")
         .with_messages(messages)
         .send()
         .await;

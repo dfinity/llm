@@ -65,10 +65,21 @@ struct Request {
     tools: Option<Vec<Tool>>,
 }
 
+/// Cycles attached to every `v1_chat` call.
+///
+/// Paid models require a minimum of 100B cycles to accept a request. Free
+/// models charge nothing: they accept no cycles and the full amount is
+/// refunded. Paid models accept only what's needed to cover the request and
+/// refund the remainder, so attaching this amount unconditionally is safe.
+///
+/// Note: the calling canister must hold at least this many cycles when `send()`
+/// runs, otherwise the call traps.
+const CYCLES_PER_CHAT: u128 = 100_000_000_000;
+
 /// Builder for creating and sending chat requests to the LLM canister.
 #[derive(Debug)]
 pub struct ChatBuilder {
-    model: crate::Model,
+    model: String,
     messages: Vec<ChatMessage>,
     tools: Vec<Tool>,
     canister: Principal,
@@ -76,9 +87,12 @@ pub struct ChatBuilder {
 
 impl ChatBuilder {
     /// Creates a new chat builder with a model.
-    pub fn new(model: crate::Model) -> Self {
+    ///
+    /// `model` is the canister's model identifier, e.g. `"llama3.1:8b"` (free)
+    /// or `"gemma3:27b"` (paid). See the README for the current list.
+    pub fn new(model: impl Into<String>) -> Self {
         Self {
-            model,
+            model: model.into(),
             messages: Vec::new(),
             tools: Vec::new(),
             canister: crate::default_llm_canister(),
@@ -111,6 +125,10 @@ impl ChatBuilder {
     }
 
     /// Sends the chat request to the LLM canister.
+    ///
+    /// Attaches `CYCLES_PER_CHAT` cycles to pay for paid models. Free models
+    /// refund the full amount. The calling canister must hold at least that
+    /// many cycles or this call traps.
     pub async fn send(self) -> Response {
         let tools_option = if self.tools.is_empty() {
             None
@@ -120,8 +138,9 @@ impl ChatBuilder {
 
         ic_cdk::call::Call::bounded_wait(self.canister, "v1_chat")
             .change_timeout(300)
+            .with_cycles(CYCLES_PER_CHAT)
             .with_arg(Request {
-                model: self.model.to_string(),
+                model: self.model,
                 messages: self.messages,
                 tools: tools_option,
             })
@@ -136,11 +155,10 @@ impl ChatBuilder {
 mod tests {
     use super::*;
     use crate::tool::ToolBuilder;
-    use crate::Model;
 
     #[test]
     fn create_chat_builder() {
-        let builder = ChatBuilder::new(Model::Llama3_1_8B);
+        let builder = ChatBuilder::new("llama3.1:8b");
         assert!(builder.messages.is_empty());
         assert!(builder.tools.is_empty());
     }
@@ -156,7 +174,7 @@ mod tests {
             },
         ];
 
-        let builder = ChatBuilder::new(Model::Llama3_1_8B).with_messages(messages.clone());
+        let builder = ChatBuilder::new("llama3.1:8b").with_messages(messages.clone());
 
         assert_eq!(builder.messages, messages);
         assert!(builder.tools.is_empty());
@@ -168,7 +186,7 @@ mod tests {
             .with_description("A test tool")
             .build();
 
-        let builder = ChatBuilder::new(Model::Llama3_1_8B).with_tools(vec![tool.clone()]);
+        let builder = ChatBuilder::new("llama3.1:8b").with_tools(vec![tool.clone()]);
 
         assert!(builder.messages.is_empty());
         assert_eq!(builder.tools.len(), 1);
@@ -177,7 +195,7 @@ mod tests {
 
     #[test]
     fn chat_builder_defaults_to_mainnet_llm_canister() {
-        let builder = ChatBuilder::new(Model::Llama3_1_8B);
+        let builder = ChatBuilder::new("llama3.1:8b");
         assert_eq!(
             builder.canister,
             Principal::from_text(crate::MAINNET_LLM_CANISTER).unwrap(),
@@ -187,7 +205,7 @@ mod tests {
     #[test]
     fn chat_builder_with_canister() {
         let canister = Principal::from_slice(&[1, 2, 3, 4]);
-        let builder = ChatBuilder::new(Model::Llama3_1_8B).with_canister(canister);
+        let builder = ChatBuilder::new("llama3.1:8b").with_canister(canister);
         assert_eq!(builder.canister, canister);
     }
 
@@ -199,7 +217,7 @@ mod tests {
 
         let tool = ToolBuilder::new("test_tool").build();
 
-        let builder = ChatBuilder::new(Model::Llama3_1_8B)
+        let builder = ChatBuilder::new("llama3.1:8b")
             .with_messages(messages.clone())
             .with_tools(vec![tool.clone()]);
 

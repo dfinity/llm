@@ -5,9 +5,9 @@ canisters:
     build:
       steps:
         - type: pre-built
-          url: https://github.com/dfinity/llm/releases/download/v0.3.1/llm-canister.wasm
-          sha256: 9fc6a172b13289428c6975895382c3c923fb641bcd8e8a5168469298c3cff310
-    init_args: "(opt variant { ollama }, null)"
+          url: https://github.com/dfinity/llm/releases/download/v1.1.0/llm-canister.wasm
+          sha256: c09c3bbb33a1a60bad432e697684d109180d8272ea0a909fd511129c2ca178c5
+    init_args: "(opt variant { https = record { api_key = \"<YOUR_IIG_API_KEY>\" } })"
 
   - name: agent-backend
     recipe:
