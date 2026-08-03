@@ -29,6 +29,14 @@ module {
     /// accept no cycles, so we attach none — see `FREE_MODELS`.
     let CYCLES_PER_CHAT : Nat = 100_000_000_000;
 
+    /// Deadline (in seconds) for a `v1_chat` call, after which the system may
+    /// return a `SYS_UNKNOWN` reject instead of the actual response. Bounded
+    /// wait keeps the caller upgradeable — an unbounded wait would block
+    /// upgrades indefinitely if the LLM canister became unresponsive — and
+    /// lets the library be called from cloud engine canisters. Mirrors the
+    /// Rust library's 5-minute `change_timeout(300)`.
+    let CHAT_TIMEOUT_SECONDS : Nat32 = 300;
+
     /// Models that are free to call. Requests to these attach no cycles, so the
     /// calling canister doesn't need to hold any. Every other model is treated
     /// as paid and gets `CYCLES_PER_CHAT` attached.
@@ -103,13 +111,20 @@ module {
 
         /// Sends the chat request to the LLM canister.
         ///
+        /// Uses bounded wait with a `CHAT_TIMEOUT_SECONDS` deadline so an
+        /// unresponsive LLM canister cannot block the caller's upgrades
+        /// indefinitely. If the deadline expires (or the subnet runs low on
+        /// resources), the system returns a `SYS_UNKNOWN` reject, which traps
+        /// this call — wrap `send()` in `try/catch` to handle that case.
+        ///
         /// Paid models get `CYCLES_PER_CHAT` cycles attached (the calling
         /// canister must hold at least that many or this call traps); free
         /// models get none.
         public func send() : async Response {
             let request = build();
             let cyclesToAttach = if (isFreeModel(_model)) 0 else CYCLES_PER_CHAT;
-            await (with cycles = cyclesToAttach) llmCanister<system>().v1_chat(request)
+            let boundedWait = { timeout = CHAT_TIMEOUT_SECONDS };
+            await (boundedWait with cycles = cyclesToAttach) llmCanister<system>().v1_chat(request)
         };
     };
 };
