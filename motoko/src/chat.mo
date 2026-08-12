@@ -1,5 +1,4 @@
 import Prim "mo:⛔";
-import Principal "mo:base/Principal";
 import Tool "./tool";
 
 module {
@@ -10,21 +9,17 @@ module {
     v1_chat : (Request) -> async Response;
   };
 
-  /// Resolves the LLM canister principal to call.
+  /// Resolves the LLM canister to call.
   ///
   /// Prefers the `PUBLIC_CANISTER_ID:llm` environment variable (auto-injected
   /// by `icp deploy` so the library targets the local `llm` canister during
   /// development) and otherwise falls back to the mainnet canister.
-  func llmCanisterId<system>() : Principal {
-    switch (Prim.envVar<system>("PUBLIC_CANISTER_ID:llm")) {
-      case (?principal) Principal.fromText(principal);
-      case null Principal.fromText(MAINNET_LLM_CANISTER);
-    };
-  };
-
-  /// Resolves the LLM canister to call.
   func llmCanister<system>() : LlmCanister {
-    actor (Principal.toText(llmCanisterId<system>())) : LlmCanister;
+    let id = switch (Prim.envVar<system>("PUBLIC_CANISTER_ID:llm")) {
+      case (?principal) principal;
+      case null MAINNET_LLM_CANISTER;
+    };
+    actor (id) : LlmCanister;
   };
 
   /// Cycles attached to a `v1_chat` call when the caller opts in via
