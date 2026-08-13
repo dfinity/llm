@@ -2,6 +2,28 @@ use crate::tool::Tool;
 use candid::{CandidType, Principal};
 use serde::{Deserialize, Serialize};
 
+// The mainnet principal of the LLM canister.
+const MAINNET_LLM_CANISTER: &str = "w36hm-eqaaa-aaaal-qr76a-cai";
+
+// Resolves the LLM canister to call.
+//
+// Prefers the `PUBLIC_CANISTER_ID:llm` environment variable (auto-injected by
+// `icp deploy` so the library targets the local `llm` canister during
+// development) and otherwise falls back to the mainnet canister.
+fn default_llm_canister() -> Principal {
+    // The env-var lookup only works in a canister; skip in unit tests.
+    #[cfg(not(test))]
+    {
+        const LLM_CANISTER_ENV: &str = "PUBLIC_CANISTER_ID:llm";
+        if ic_cdk::api::env_var_name_exists(LLM_CANISTER_ENV) {
+            let id = ic_cdk::api::env_var_value(LLM_CANISTER_ENV);
+            return Principal::from_text(&id)
+                .unwrap_or_else(|e| ic_cdk::trap(format!("invalid {LLM_CANISTER_ENV}: {e}")));
+        }
+    }
+    Principal::from_text(MAINNET_LLM_CANISTER).unwrap()
+}
+
 /// A message in a chat.
 #[derive(CandidType, Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum ChatMessage {
@@ -65,16 +87,16 @@ struct Request {
     tools: Option<Vec<Tool>>,
 }
 
-/// Cycles attached to every `v1_chat` call.
+/// Cycles attached to a `v1_chat` call when the caller opts in via
+/// [`ChatBuilder::with_cycles`].
 ///
-/// Paid models require a minimum of 100B cycles to accept a request. Free
-/// models charge nothing: they accept no cycles and the full amount is
-/// refunded. Paid models accept only what's needed to cover the request and
-/// refund the remainder, so attaching this amount unconditionally is safe.
-///
-/// Note: the calling canister must hold at least this many cycles when `send()`
-/// runs, otherwise the call traps.
+/// Paid models require a minimum of 100B cycles to accept a request; they
+/// charge only what the request costs and refund the remainder. Free models
+/// accept no cycles.
 const CYCLES_PER_CHAT: u128 = 100_000_000_000;
+
+/// Deadline (in seconds) for a `v1_chat` call.
+const CHAT_TIMEOUT_SECONDS: u32 = 300;
 
 /// Builder for creating and sending chat requests to the LLM canister.
 #[derive(Debug)]
@@ -82,7 +104,7 @@ pub struct ChatBuilder {
     model: String,
     messages: Vec<ChatMessage>,
     tools: Vec<Tool>,
-    canister: Principal,
+    attach_cycles: bool,
 }
 
 impl ChatBuilder {
@@ -95,7 +117,7 @@ impl ChatBuilder {
             model: model.into(),
             messages: Vec::new(),
             tools: Vec::new(),
-            canister: crate::default_llm_canister(),
+            attach_cycles: false,
         }
     }
 
@@ -111,24 +133,24 @@ impl ChatBuilder {
         self
     }
 
-    /// Overrides the LLM canister to call.
+    /// Attaches cycles to the request (100B cycles).
     ///
-    /// By default the SDK addresses the mainnet LLM canister
-    /// (`w36hm-eqaaa-aaaal-qr76a-cai`), unless `icp deploy` has auto-injected
-    /// `PUBLIC_CANISTER_ID:llm` on this canister — in which case that value is
-    /// used. Set this only when neither default is what you want (e.g. when
-    /// pointing at a fork, a mock, or a staging deployment under a different
-    /// name).
-    pub fn with_canister(mut self, canister: Principal) -> Self {
-        self.canister = canister;
+    /// Call this when you want to pay for models using attached cycles. By
+    /// default, no cycles are attached and your request is charged against the
+    /// canister's balance on IIG.
+    ///
+    /// Paid models charge only what the request costs and refund the remainder;
+    /// free models accept no cycles. Note that the calling canister must hold at
+    /// least 100B cycles when `send()` runs, otherwise the call traps.
+    pub fn with_cycles(mut self) -> Self {
+        self.attach_cycles = true;
         self
     }
 
     /// Sends the chat request to the LLM canister.
     ///
-    /// Attaches `CYCLES_PER_CHAT` cycles to pay for paid models. Free models
-    /// refund the full amount. The calling canister must hold at least that
-    /// many cycles or this call traps.
+    /// Attaches cycles only when [`with_cycles`](Self::with_cycles) was called;
+    /// otherwise the request is charged against the canister's balance on IIG.
     pub async fn send(self) -> Response {
         let tools_option = if self.tools.is_empty() {
             None
@@ -136,9 +158,15 @@ impl ChatBuilder {
             Some(self.tools)
         };
 
-        ic_cdk::call::Call::bounded_wait(self.canister, "v1_chat")
-            .change_timeout(300)
-            .with_cycles(CYCLES_PER_CHAT)
+        let cycles_to_attach = if self.attach_cycles {
+            CYCLES_PER_CHAT
+        } else {
+            0
+        };
+
+        ic_cdk::call::Call::bounded_wait(default_llm_canister(), "v1_chat")
+            .change_timeout(CHAT_TIMEOUT_SECONDS)
+            .with_cycles(cycles_to_attach)
             .with_arg(Request {
                 model: self.model,
                 messages: self.messages,
@@ -194,19 +222,15 @@ mod tests {
     }
 
     #[test]
-    fn chat_builder_defaults_to_mainnet_llm_canister() {
+    fn chat_builder_defaults_to_no_cycles() {
         let builder = ChatBuilder::new("llama3.1:8b");
-        assert_eq!(
-            builder.canister,
-            Principal::from_text(crate::MAINNET_LLM_CANISTER).unwrap(),
-        );
+        assert!(!builder.attach_cycles);
     }
 
     #[test]
-    fn chat_builder_with_canister() {
-        let canister = Principal::from_slice(&[1, 2, 3, 4]);
-        let builder = ChatBuilder::new("llama3.1:8b").with_canister(canister);
-        assert_eq!(builder.canister, canister);
+    fn chat_builder_with_cycles() {
+        let builder = ChatBuilder::new("llama3.1:8b").with_cycles();
+        assert!(builder.attach_cycles);
     }
 
     #[test]

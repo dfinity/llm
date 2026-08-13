@@ -1,302 +1,101 @@
 # `ic-llm`
 
-
 A library for making requests to the LLM canister on the Internet Computer.
 
 ## Supported Models
 
 Models are identified by their string name (passed to `ic_llm::prompt` and
-`ic_llm::chat`). The available models are:
+`ic_llm::chat`). See the [Intelligence Gateway Homepage](https://inference.internetcomputer.org/) for the authoritative, up-to-date list.
 
-| Model string      | Pricing |
-| ----------------- | ------- |
-| `"llama3.1:8b"`   | Free    |
-| `"qwen3:32b"`     | Free    |
-| `"llama4-scout"`  | Free    |
-| `"qwen2.5:0.5b"`  | Free    |
-| `"gemma3:27b"`    | Paid    |
-| `"z-ai:glm-5.2"`  | Paid    |
+## Examples
 
-Models are added frequently — see the [LLM canister](../README.md) for the
-authoritative, up-to-date list.
-
-### Paying for models
-
-`send()` automatically attaches 100B cycles to every request. Paid models are
-charged from those cycles (any unused portion is refunded); free models refund
-the full amount. Because cycles are always attached, **the calling canister must
-hold at least 100B cycles when `send()` runs, or the call traps** — this applies
-even when using a free model.
-
-## Local Development
-
-When developing locally, the architecture differs slightly from mainnet: instead
-of relying on AI workers, the LLM canister connects directly to a local
-[Ollama](https://ollama.com/) instance. The interface is identical to mainnet —
-see [How Does it Work?](../README.md#how-does-it-work) for details.
-
-Before running an agent locally, start Ollama and pull the model you intend to
-use:
-
-```bash
-ollama serve
-ollama run llama3.1:8b   # one-time download
-```
-
-For complete, working project setups — including how to deploy the LLM canister
-locally — see the examples in this repository (e.g.
-[`examples/quickstart-agent-rust`](../examples/quickstart-agent-rust)).
-
-## Usage
-
-### Basic Usage
-
-#### Prompting (Single Message)
-
-The simplest way to interact with a model is by sending a single prompt:
+The simplest interaction is a single prompt, which returns the reply text
+directly:
 
 ```rust
 async fn example() -> String {
-    ic_llm::prompt("llama3.1:8b", "What's the speed of light?").await
+    ic_llm::prompt("llama3.1:8b", "Write a haiku about the Internet Computer.").await
 }
 ```
 
-#### Chatting (Multiple Messages)
+For a multi-turn conversation, build a chat from a list of messages:
 
-For more complex interactions, you can send multiple messages in a conversation:
+```rust
+use ic_llm::ChatMessage;
+
+async fn example() -> String {
+    let response = ic_llm::chat("llama3.1:8b")
+        .with_messages(vec![
+            ChatMessage::System {
+                content: "You are a helpful assistant for Internet Computer developers.".to_string(),
+            },
+            ChatMessage::User {
+                content: "Suggest a fun name for my new canister.".to_string(),
+            },
+        ])
+        .send()
+        .await;
+
+    response.message.content.unwrap_or_default()
+}
+```
+
+To pay per request, attach cycles with `.with_cycles()` (see
+[Paying for Models](#paying-for-models)):
 
 ```rust
 use ic_llm::ChatMessage;
 
 async fn example() {
-    ic_llm::chat("llama3.1:8b")
+    ic_llm::chat("gemma3:27b")
         .with_messages(vec![
             ChatMessage::System {
-                content: "You are a helpful assistant".to_string(),
+                content: "You are a helpful assistant for Internet Computer developers.".to_string(),
             },
             ChatMessage::User {
-                content: "How big is the sun?".to_string(),
+                content: "Suggest a fun name for my new canister.".to_string(),
             },
         ])
+        .with_cycles()
         .send()
         .await;
 }
 ```
 
-### Choosing the LLM canister
+## Paying for Models
 
-By default the SDK addresses the mainnet LLM canister (`w36hm-eqaaa-aaaal-qr76a-cai`).
-When your canister is deployed with `icp deploy`, the SDK transparently picks up
-`PUBLIC_CANISTER_ID:llm` if it has been auto-injected — so the same code works
-against a local `llm` canister whose principal differs from mainnet, with no
-caller-side changes.
+Paying for inference can be done in two ways.
 
-For other cases (a fork, a mock, a staging deployment under a different name),
-override the canister explicitly:
+1. **Deposit cycles up front.** Add a cycles balance at
+   [inference.internetcomputer.org](https://inference.internetcomputer.org). The
+   LLM canister draws from that balance, so requests need no attached cycles —
+   just call without `.with_cycles()`. This works on **both mainnet and cloud
+   engines**.
 
-```rust
-use candid::Principal;
-async fn example() {
-    let custom = Principal::from_text("aaaaa-aa").unwrap();
-    ic_llm::chat("llama3.1:8b")
-        .with_canister(custom)
-        .with_messages(vec![])
-        .send()
-        .await;
-}
-```
+2. **Attach cycles per request.** Call `.with_cycles()` on the builder and
+   `send()` attaches 100B cycles (the model charges only what it needs and
+   refunds the rest), **so the calling canister must hold at least 100B cycles or
+   the call traps**. This works on **mainnet only** — cloud engine canisters
+   cannot send cross-subnet messages that carry attached cycles.
 
-### Advanced Usage with Tools
+## Local Development
 
-#### Understanding Tools
+The library resolves which `llm` canister to call at runtime, so the same code
+works locally and on mainnet:
 
-**Tools** are custom functions that you define and make available to the LLM. 
-They allow the AI to perform actions beyond just generating text responses.
-When you provide tools to the LLM, it can decide when and how to use them based on the user's request.
+- **Mainnet:** it calls the canonical LLM canister
+  (`w36hm-eqaaa-aaaal-qr76a-cai`), which requires no API key.
+- **Locally:** `icp deploy` injects the local `llm` canister's principal as the
+  `PUBLIC_CANISTER_ID:llm` environment variable and the library picks it up
+  automatically. The local `llm` canister runs in `https` mode and needs an
+  [Internet Intelligence Gateway](https://inference.internetcomputer.org/) API
+  key to serve prompts.
 
-**Common use cases for tools:**
-- **Data retrieval**: Fetching real-time information (prices, weather, account balances)
-- **External API calls**: Integrating with third-party services
-- **Calculations**: Performing complex computations
-- **Database operations**: Querying or updating data
-- **Custom business logic**: Executing domain-specific functions
+See the [quickstart example](../examples/quickstart-agent-rust) for a complete
+project — `icp.yaml`, deploying locally, and calling the agent.
 
-**How it works:**
-1. You define available tools with their parameters
-2. The LLM analyzes the user's request
-3. If a tool would be helpful, the LLM returns a "tool call" instead of a direct answer
-4. Your code executes the requested tool with the LLM's provided parameters
-5. You send the tool's result back to the LLM
-6. The LLM incorporates the result into its final response
+## Install
 
-#### Defining and Using a Tool
-
-You can define tools that the LLM can use to perform actions:
-
-```rust
-use ic_llm::{ChatMessage, ParameterType};
-
-async fn example() {
-    ic_llm::chat("llama3.1:8b")
-        .with_messages(vec![
-            ChatMessage::System {
-                content: "You are a helpful assistant".to_string(),
-            },
-            ChatMessage::User {
-                content: "What's the balance of account abc123?".to_string(),
-            },
-        ])
-        .with_tools(vec![
-            ic_llm::tool("icp_account_balance")
-                .with_description("Lookup the balance of an ICP account")
-                .with_parameter(
-                    ic_llm::parameter("account", ParameterType::String)
-                        .with_description("The ICP account to look up")
-                        .is_required()
-                )
-                .build()
-        ])
-        .send()
-        .await;
-}
-```
-
-#### Handling Tool Calls from the LLM
-
-When the LLM decides to use one of your tools, you can handle the call:
-
-```rust
-use ic_llm::{ChatMessage, ParameterType, Response};
-
-async fn example() -> Response {
-    let response = ic_llm::chat("llama3.1:8b")
-        .with_messages(vec![
-            ChatMessage::System {
-                content: "You are a helpful assistant".to_string(),
-            },
-            ChatMessage::User {
-                content: "What's the weather in San Francisco?".to_string(),
-            },
-        ])
-        .with_tools(vec![
-            ic_llm::tool("get_weather")
-                .with_description("Get current weather for a location")
-                .with_parameter(
-                    ic_llm::parameter("location", ParameterType::String)
-                        .with_description("The location to get weather for")
-                        .is_required()
-                )
-                .build()
-        ])
-        .send()
-        .await;
-    
-    // Process tool calls if any
-    for tool_call in &response.message.tool_calls {
-        match tool_call.function.name.as_str() {
-            "get_weather" => {
-                // Extract the location parameter
-                let location = tool_call.function.get("location").unwrap();
-                // Call your weather API or service
-                let weather = get_weather(&location).await;
-                // You would typically send this information back to the LLM in a follow-up message
-            }
-            _ => {} // Handle other tool calls
-        }
-    }
-    
-    response
-}
-
-// Mock function for getting weather
-async fn get_weather(location: &str) -> String {
-    format!("Weather in {}: Sunny, 72°F", location)
-}
-```
-
-#### Complete Tool Usage Example
-
-Here's a more complete example showing how to handle tool calls and continue the conversation:
-
-```rust
-use ic_llm::{ChatMessage, ParameterType, Response};
-
-async fn handle_chat_with_tools(user_message: String) -> String {
-    let mut messages = vec![
-        ChatMessage::System {
-            content: "You are a helpful assistant".to_string(),
-        },
-        ChatMessage::User {
-            content: user_message,
-        },
-    ];
-
-    let tools = vec![
-        ic_llm::tool("get_weather")
-            .with_description("Get current weather for a location")
-            .with_parameter(
-                ic_llm::parameter("location", ParameterType::String)
-                    .with_description("The location to get weather for")
-                    .is_required()
-            )
-            .build(),
-        ic_llm::tool("get_icp_price")
-            .with_description("Get the current ICP token price")
-            .build()
-    ];
-
-    let response = ic_llm::chat("llama3.1:8b")
-        .with_messages(messages.clone())
-        .with_tools(tools)
-        .send()
-        .await;
-
-    // Check if LLM wants to use tools
-    if !response.message.tool_calls.is_empty() {
-        // Add assistant message with tool calls
-        messages.push(ChatMessage::Assistant(response.message.clone()));
-
-        // Process each tool call
-        for tool_call in &response.message.tool_calls {
-            let tool_result = match tool_call.function.name.as_str() {
-                "get_weather" => {
-                    let location = tool_call.function.get("location").unwrap_or_default();
-                    get_weather(&location).await
-                }
-                "get_icp_price" => {
-                    get_icp_price().await
-                }
-                _ => format!("Unknown tool: {}", tool_call.function.name)
-            };
-
-            // Add tool result to conversation
-            messages.push(ChatMessage::Tool {
-                content: tool_result,
-                tool_call_id: tool_call.id.clone(),
-            });
-        }
-
-        // Get final response from LLM with tool results
-        let final_response = ic_llm::chat("llama3.1:8b")
-            .with_messages(messages)
-            .send()
-            .await;
-
-        final_response.message.content.unwrap_or_default()
-    } else {
-        // No tool calls needed, return direct response
-        response.message.content.unwrap_or_default()
-    }
-}
-
-// Example tool implementations
-async fn get_weather(location: &str) -> String {
-    // In a real implementation, you would call a weather API
-    format!("Weather in {}: Sunny, 72°F", location)
-}
-
-async fn get_icp_price() -> String {
-    // In a real implementation, you would call a price API
-    "Current ICP price: $10.50".to_string()
-}
+```bash
+cargo add ic-llm
 ```
