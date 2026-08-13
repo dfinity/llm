@@ -25,15 +25,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install dfx
-        uses: dfinity/setup-dfx@main
-
-      - name: Install mops
-        run: |
-          dfx cache install
-          echo "$(dfx cache show)" >> $GITHUB_PATH
-          curl -fsSL cli.mops.one/install.sh | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+        with:
+          cache: false
 
       - name: Run Motoko tests
         working-directory: ./motoko
