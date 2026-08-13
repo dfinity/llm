@@ -15,5 +15,6 @@
 .mops/
 mops.lock
 
-# environment files (never commit secrets)
+# secrets (the IIG API key, read by the `llm` canister — never commit these)
+.secrets/
 .env

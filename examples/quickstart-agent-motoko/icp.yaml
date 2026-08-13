@@ -1,17 +1,21 @@
-# yaml-language-server: $schema=https://github.com/dfinity/icp-cli/raw/refs/tags/v0.1.0/docs/schemas/icp-yaml-schema.json
+# yaml-language-server: $schema=https://github.com/dfinity/icp-cli/raw/refs/tags/v1.3.0/docs/schemas/icp-yaml-schema.json
 
 canisters:
   - name: llm
     build:
       steps:
         - type: pre-built
-          url: https://github.com/dfinity/llm/releases/download/v1.1.0/llm-canister.wasm
-          sha256: fe79870bcb33fec5e102dd5ef91a9723aa7a0ab41fda635dad1b4ca20315ba07
-    init_args: '(opt variant {
-      https = record {
-        api_key = "iig_aWF4tapZZEn_j28YjA0HseBpCUWU0thka3VQHB94pMc"
-      }
-    })'
+          url: https://github.com/dfinity/llm/releases/download/v1.2.0/llm-canister.wasm
+          sha256: 2e12fcfc005e0e586dd43a74826c2e4b9f810156cf9aeb18c7bd687e352a63f7
+    init_args: '(opt variant { https = record {} })'
+    settings:
+      # The canister authenticates its HTTPS outcalls to the Internet
+      # Intelligence Gateway with this API key. It's read from the
+      # gitignored `.secrets/iig-api-key` file so the secret stays out of
+      # committed config. See the README's "Getting an API key".
+      environment_variables:
+        IIG_API_KEY:
+          path: ./.secrets/iig-api-key
 
   - name: agent
     recipe:
