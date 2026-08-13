@@ -9,7 +9,6 @@ module {
   public type Response = Chat.Response;
   public type Request = Chat.Request;
 
-
   public func prompt(model : Text, promptStr : Text) : async Text {
     let response = await Chat.ChatBuilder(model).withMessages([
       #user({
@@ -27,11 +26,11 @@ module {
     Chat.ChatBuilder(model);
   };
 
-  public func tool(name: Text) : Tool.ToolBuilder {
-    Tool.ToolBuilder(name)
+  public func tool(name : Text) : Tool.ToolBuilder {
+    Tool.ToolBuilder(name);
   };
 
-  public func parameter(name: Text, type_: Tool.ParameterType) : Tool.ParameterBuilder {
-    Tool.ParameterBuilder(name, type_)
+  public func parameter(name : Text, type_ : Tool.ParameterType) : Tool.ParameterBuilder {
+    Tool.ParameterBuilder(name, type_);
   };
 };
