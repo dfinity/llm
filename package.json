@@ -4,7 +4,7 @@
   "devDependencies": {
     "@icp-sdk/ic-wasm": "0.9.10",
     "@icp-sdk/icp-cli": "1.3.0",
-    "ic-mops": "2.13.2"
+    "ic-mops": "2.19.2"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
