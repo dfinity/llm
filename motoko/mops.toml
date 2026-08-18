@@ -7,10 +7,10 @@ keywords = [ "llm", "ai", "agent" ]
 license = "MIT"
 
 [dependencies]
-base = "0.14.9"
+core = "2.6.1"
 
 [dev-dependencies]
 test = "2.1.1"
 
 [toolchain]
-moc = "1.8.2"
+moc = "1.14.1"

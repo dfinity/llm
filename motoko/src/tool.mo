@@ -1,4 +1,4 @@
-import Array "mo:base/Array";
+import Array "mo:core/Array";
 
 module {
     /// Represents a tool that can be called by an agent.
@@ -145,24 +145,17 @@ module {
 
         /// Adds a parameter to the function.
         public func withParameter(parameter : ParameterBuilder) : ToolBuilder {
-            parameters := Array.append(parameters, [parameter]);
+            parameters := parameters.concat([parameter]);
             return self;
         };
 
         /// Builds the final Tool.
         public func build() : Tool {
             if (parameters.size() > 0) {
-                let properties = Array.map<ParameterBuilder, Property>(
-                    parameters,
-                    func(p) { p.toProperty() },
-                );
-                let required = Array.map<ParameterBuilder, Text>(
-                    Array.filter<ParameterBuilder>(
-                        parameters,
-                        func(p) { p.isRequiredValue() },
-                    ),
-                    func(p) { p.getName() },
-                );
+                let properties = parameters.map<ParameterBuilder, Property>(func(p) { p.toProperty() });
+                let required = parameters
+                    .filter<ParameterBuilder>(func(p) { p.isRequiredValue() })
+                    .map<ParameterBuilder, Text>(func(p) { p.getName() });
 
                 let updatedFunction = {
                     name = function.name;
@@ -184,12 +177,7 @@ module {
     /// Retrieves the argument of the given `FunctionCall`.
     public func getArgument(functionCall : FunctionCall, argumentName : Text) : ?Text {
         switch (
-            Array.find<ToolCallArgument>(
-                functionCall.arguments,
-                func(arg) : Bool {
-                    arg.name == argumentName;
-                },
-            )
+            functionCall.arguments.find<ToolCallArgument>(func(arg) { arg.name == argumentName })
         ) {
             case (null) { null };
             case (?arg) { ?arg.value };
