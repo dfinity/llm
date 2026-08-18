@@ -13,7 +13,8 @@ pub use tool::{
 /// Sends a single message to a model.
 ///
 /// `model` is the canister's model identifier, e.g. `"llama3.1:8b"` (free) or
-/// `"gemma3:27b"` (paid). See the README for the current list.
+/// `"gemma3:27b"` (paid). See the [Intelligence Gateway](https://inference.internetcomputer.org/)
+/// for the current list.
 ///
 /// # Example
 ///

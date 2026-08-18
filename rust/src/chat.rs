@@ -111,7 +111,8 @@ impl ChatBuilder {
     /// Creates a new chat builder with a model.
     ///
     /// `model` is the canister's model identifier, e.g. `"llama3.1:8b"` (free)
-    /// or `"gemma3:27b"` (paid). See the README for the current list.
+    /// or `"gemma3:27b"` (paid). See the [Intelligence Gateway](https://inference.internetcomputer.org/)
+    /// for the current list.
     pub fn new(model: impl Into<String>) -> Self {
         Self {
             model: model.into(),
