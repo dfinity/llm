@@ -62,115 +62,106 @@ module {
     };
 
     /// Builder for creating a parameter for a function tool.
-    public class ParameterBuilder(name : Text, type_ : ParameterType) = self {
-        private var _name : Text = name;
-        private var _type : ParameterType = type_;
-        private var _description : ?Text = null;
-        private var _required : Bool = false;
-        private var _enum_values : ?[Text] = null;
+    public module ParameterBuilder {
+        public type ParameterBuilder = {
+            name : Text;
+            parameterType : ParameterType;
+            var description : ?Text;
+            var required : Bool;
+            var enumValues : ?[Text];
+        };
+
+        public func new(name : Text, type_ : ParameterType) : ParameterBuilder {
+            {
+                name = name;
+                parameterType = type_;
+                var description = null;
+                var required = false;
+                var enumValues = null;
+            };
+        };
 
         /// Add a description to the parameter.
-        public func withDescription(description : Text) : ParameterBuilder {
-            _description := ?description;
-            return self;
+        public func withDescription(self : ParameterBuilder, description : Text) : ParameterBuilder {
+            self.description := ?description;
+            self;
         };
 
         /// Mark the parameter as required.
-        public func isRequired() : ParameterBuilder {
-            _required := true;
-            return self;
+        public func isRequired(self : ParameterBuilder) : ParameterBuilder {
+            self.required := true;
+            self;
         };
 
         /// Add allowed enum values for the parameter.
-        public func withEnumValues(values : [Text]) : ParameterBuilder {
-            _enum_values := ?values;
-            return self;
-        };
-
-        /// Get the parameter name.
-        public func getName() : Text {
-            _name;
-        };
-
-        /// Get the parameter type.
-        public func getType() : ParameterType {
-            _type;
-        };
-
-        /// Get the parameter description.
-        public func getDescription() : ?Text {
-            _description;
-        };
-
-        /// Check if the parameter is required.
-        public func isRequiredValue() : Bool {
-            _required;
-        };
-
-        /// Get the enum values if any.
-        public func getEnumValues() : ?[Text] {
-            _enum_values;
+        public func withEnumValues(self : ParameterBuilder, values : [Text]) : ParameterBuilder {
+            self.enumValues := ?values;
+            self;
         };
 
         /// Convert the builder to a Property.
-        public func toProperty() : Property {
+        public func toProperty(self : ParameterBuilder) : Property {
             {
-                type_ = parameterTypeToText(_type);
-                name = _name;
-                description = _description;
-                enum_ = _enum_values;
+                type_ = parameterTypeToText(self.parameterType);
+                name = self.name;
+                description = self.description;
+                enum_ = self.enumValues;
             };
         };
     };
 
     /// Builder for creating a function tool.
-    public class ToolBuilder(name : Text) = self {
-        private var function : Function = {
-            name = name;
-            description = null;
-            parameters = null;
+    public module ToolBuilder {
+        public type ToolBuilder = {
+            name : Text;
+            var description : ?Text;
+            var parameters : [ParameterBuilder.ParameterBuilder];
         };
 
-        private var parameters : [ParameterBuilder] = [];
+        public func new(name : Text) : ToolBuilder {
+            {
+                name = name;
+                var description = null;
+                var parameters = [];
+            };
+        };
 
         /// Adds a description to the function.
-        public func withDescription(description : Text) : ToolBuilder {
-            function := {
-                name = function.name;
-                description = ?description;
-                parameters = function.parameters;
-            };
-            return self;
+        public func withDescription(self : ToolBuilder, description : Text) : ToolBuilder {
+            self.description := ?description;
+            self;
         };
 
         /// Adds a parameter to the function.
-        public func withParameter(parameter : ParameterBuilder) : ToolBuilder {
-            parameters := parameters.concat([parameter]);
-            return self;
+        public func withParameter(self : ToolBuilder, parameter : ParameterBuilder.ParameterBuilder) : ToolBuilder {
+            self.parameters := self.parameters.concat([parameter]);
+            self;
         };
 
         /// Builds the final Tool.
-        public func build() : Tool {
-            if (parameters.size() > 0) {
-                let properties = parameters.map<ParameterBuilder, Property>(func(p) { p.toProperty() });
-                let required = parameters
-                    .filter<ParameterBuilder>(func(p) { p.isRequiredValue() })
-                    .map<ParameterBuilder, Text>(func(p) { p.getName() });
-
-                let updatedFunction = {
-                    name = function.name;
-                    description = function.description;
-                    parameters = ?{
-                        type_ = "object";
-                        properties = ?properties;
-                        required = if (required.size() > 0) ?required else null;
-                    };
-                };
-
-                #function(updatedFunction);
-            } else {
-                #function(function);
+        public func build(self : ToolBuilder) : Tool {
+            if (self.parameters.size() == 0) {
+                return #function({
+                    name = self.name;
+                    description = self.description;
+                    parameters = null;
+                });
             };
+
+            let properties = self.parameters.map<ParameterBuilder.ParameterBuilder, Property>(func(p) { p.toProperty() });
+            let required = self.parameters
+                .filter<ParameterBuilder.ParameterBuilder>(func(p) { p.required })
+                .map<ParameterBuilder.ParameterBuilder, Text>(func(p) { p.name });
+
+            #function({
+                name = self.name;
+                description = self.description;
+                parameters = ?{
+                    type_ = "object";
+                    properties = ?properties;
+                    required = if (required.size() > 0) ?required else null;
+                };
+            });
         };
     };
 

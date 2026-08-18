@@ -1,11 +1,13 @@
 import Chat "../src/chat";
 import Tool "../src/tool";
+import { ChatBuilder } "../src/chat";
+import { ToolBuilder } "../src/tool";
 import { test } "mo:test";
 
 test(
   "create chat builder",
   func() {
-    let builder = Chat.ChatBuilder("llama3.1:8b");
+    let builder = ChatBuilder.new("llama3.1:8b");
 
     let request = builder.build();
     assert request == {
@@ -24,7 +26,7 @@ test(
       #user { content = "Hello" },
     ];
 
-    let builder = Chat.ChatBuilder("llama3.1:8b").withMessages(messages);
+    let builder = ChatBuilder.new("llama3.1:8b").withMessages(messages);
 
     let request = builder.build();
     assert request == {
@@ -38,9 +40,9 @@ test(
 test(
   "chat builder with tools",
   func() {
-    let tool = (Tool.ToolBuilder("test_tool")).withDescription("A test tool").build();
+    let tool = ToolBuilder.new("test_tool").withDescription("A test tool").build();
 
-    let builder = Chat.ChatBuilder("llama3.1:8b").withTools([tool]);
+    let builder = ChatBuilder.new("llama3.1:8b").withTools([tool]);
 
     let request = builder.build();
     assert request == {
@@ -58,9 +60,9 @@ test(
       #user { content = "Hello" },
     ];
 
-    let tool = (Tool.ToolBuilder("test_tool")).build();
+    let tool = ToolBuilder.new("test_tool").build();
 
-    let builder = Chat.ChatBuilder("llama3.1:8b").withMessages(messages).withTools([tool]);
+    let builder = ChatBuilder.new("llama3.1:8b").withMessages(messages).withTools([tool]);
 
     let request = builder.build();
     assert request == {
@@ -97,7 +99,7 @@ test(
 test(
   "withCycles is chainable and does not affect build()",
   func() {
-    let builder = Chat.ChatBuilder("gemma3:27b").withCycles();
+    let builder = ChatBuilder.new("gemma3:27b").withCycles();
 
     let request = builder.build();
     assert request == {
@@ -114,9 +116,9 @@ test(
     let messages : [Chat.ChatMessage] = [
       #user { content = "Hello" },
     ];
-    let tool = (Tool.ToolBuilder("test_tool")).build();
+    let tool = ToolBuilder.new("test_tool").build();
 
-    let builder = Chat.ChatBuilder("gemma3:27b").withMessages(messages).withTools([tool]).withCycles();
+    let builder = ChatBuilder.new("gemma3:27b").withMessages(messages).withTools([tool]).withCycles();
 
     let request = builder.build();
     assert request == {

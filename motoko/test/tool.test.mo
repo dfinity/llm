@@ -1,10 +1,11 @@
 import Tool "../src/tool";
+import { ToolBuilder; ParameterBuilder } "../src/tool";
 import { test } "mo:test";
 
 test(
     "create simple tool",
     func() {
-        let tool = (Tool.ToolBuilder("test_tool")).build();
+        let tool = ToolBuilder.new("test_tool").build();
 
         let expected = #function({
             name = "test_tool";
@@ -19,7 +20,7 @@ test(
 test(
     "tool with description",
     func() {
-        let tool = (Tool.ToolBuilder("test_tool"))
+        let tool = ToolBuilder.new("test_tool")
             .withDescription("This is a test tool")
             .build();
 
@@ -36,9 +37,9 @@ test(
 test(
     "tool with single parameter",
     func() {
-        let tool = (Tool.ToolBuilder("test_tool"))
+        let tool = ToolBuilder.new("test_tool")
             .withParameter(
-                (Tool.ParameterBuilder("param1", #String))
+                ParameterBuilder.new("param1", #String)
                     .withDescription("Test parameter")
                     .isRequired()
             )
@@ -66,19 +67,19 @@ test(
 test(
     "tool with multiple parameters",
     func() {
-        let tool = (Tool.ToolBuilder("weather_tool"))
+        let tool = ToolBuilder.new("weather_tool")
             .withDescription("Get weather information")
             .withParameter(
-                (Tool.ParameterBuilder("location", #String))
+                ParameterBuilder.new("location", #String)
                     .withDescription("City name")
                     .isRequired()
             )
             .withParameter(
-                (Tool.ParameterBuilder("units", #String))
+                ParameterBuilder.new("units", #String)
                     .withDescription("Temperature units")
             )
             .withParameter(
-                (Tool.ParameterBuilder("forecast", #Boolean))
+                ParameterBuilder.new("forecast", #Boolean)
                     .withDescription("Include forecast")
             )
             .build();
@@ -119,9 +120,9 @@ test(
 test(
     "optional parameter",
     func() {
-        let tool = (Tool.ToolBuilder("test_tool"))
+        let tool = ToolBuilder.new("test_tool")
             .withParameter(
-                (Tool.ParameterBuilder("optional_param", #String))
+                ParameterBuilder.new("optional_param", #String)
                     .withDescription("This parameter is optional")
             )
             .build();
@@ -157,10 +158,10 @@ test(
 test(
     "weather tool example",
     func() {
-        let weather_tool = (Tool.ToolBuilder("get_current_weather"))
+        let weather_tool = ToolBuilder.new("get_current_weather")
             .withDescription("Get current weather for a location.")
             .withParameter(
-                (Tool.ParameterBuilder("location", #String))
+                ParameterBuilder.new("location", #String)
                     .withDescription("The location to get the weather for (e.g. Cairo, Egypt)")
                     .isRequired()
             )
@@ -188,10 +189,10 @@ test(
 test(
     "number parameter",
     func() {
-        let tool = (Tool.ToolBuilder("calculator"))
+        let tool = ToolBuilder.new("calculator")
             .withDescription("Perform mathematical calculations")
             .withParameter(
-                (Tool.ParameterBuilder("value", #Number))
+                ParameterBuilder.new("value", #Number)
                     .withDescription("The numeric value to use in calculation")
                     .isRequired()
             )
@@ -219,15 +220,15 @@ test(
 test(
     "enum parameter",
     func() {
-        let tool = (Tool.ToolBuilder("unit_converter"))
+        let tool = ToolBuilder.new("unit_converter")
             .withDescription("Convert between different units")
             .withParameter(
-                (Tool.ParameterBuilder("value", #Number))
+                ParameterBuilder.new("value", #Number)
                     .withDescription("The value to convert")
                     .isRequired()
             )
             .withParameter(
-                (Tool.ParameterBuilder("unit", #String))
+                ParameterBuilder.new("unit", #String)
                     .withDescription("The unit to convert to")
                     .withEnumValues(["meters", "feet", "kilometers", "miles"])
                     .isRequired()

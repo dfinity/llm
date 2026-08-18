@@ -59,21 +59,32 @@ module {
   };
 
   /// Builder for creating and sending chat requests to the LLM canister.
-  public class ChatBuilder(model : Text) = self {
-    private var _model : Text = model;
-    private var _messages : [ChatMessage] = [];
-    private var _tools : [Tool.Tool] = [];
-    private var _attachCycles : Bool = false;
+  public module ChatBuilder {
+    public type ChatBuilder = {
+      model : Text;
+      var messages : [ChatMessage];
+      var tools : [Tool.Tool];
+      var attachCycles : Bool;
+    };
+
+    public func new(model : Text) : ChatBuilder {
+      {
+        model = model;
+        var messages = [];
+        var tools = [];
+        var attachCycles = false;
+      };
+    };
 
     /// Sets the messages for the chat.
-    public func withMessages(messages : [ChatMessage]) : ChatBuilder {
-      _messages := messages;
+    public func withMessages(self : ChatBuilder, messages : [ChatMessage]) : ChatBuilder {
+      self.messages := messages;
       self;
     };
 
     /// Sets the tools for the chat.
-    public func withTools(tools : [Tool.Tool]) : ChatBuilder {
-      _tools := tools;
+    public func withTools(self : ChatBuilder, tools : [Tool.Tool]) : ChatBuilder {
+      self.tools := tools;
       self;
     };
 
@@ -82,30 +93,24 @@ module {
     /// Call this when you want to pay for models using attached cycles.
     /// By default, no cycles are attached and your request is charged
     /// against the canister's balance on IIG.
-    public func withCycles() : ChatBuilder {
-      _attachCycles := true;
+    public func withCycles(self : ChatBuilder) : ChatBuilder {
+      self.attachCycles := true;
       self;
     };
 
     /// Builds the chat request without sending it.
-    public func build() : Request {
-      let tools_option = if (_tools.size() == 0) {
-        null;
-      } else {
-        ?_tools;
-      };
-
+    public func build(self : ChatBuilder) : Request {
       {
-        model = _model;
-        messages = _messages;
-        tools = tools_option;
+        model = self.model;
+        messages = self.messages;
+        tools = if (self.tools.size() == 0) null else ?self.tools;
       };
     };
 
     /// Sends the chat request to the LLM canister.
-    public func send() : async Response {
-      let request = build();
-      let cyclesToAttach = if (_attachCycles) CYCLES_PER_CHAT else 0;
+    public func send(self : ChatBuilder) : async Response {
+      let request = build(self);
+      let cyclesToAttach = if (self.attachCycles) CYCLES_PER_CHAT else 0;
       await (with cycles = cyclesToAttach; timeout = CHAT_TIMEOUT_SECONDS) llmCanister<system>().v1_chat(request);
     };
   };
